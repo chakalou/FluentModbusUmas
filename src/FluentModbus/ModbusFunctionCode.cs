@@ -80,6 +80,11 @@
         /// </summary>
         ReadFifoQueue = 0x18,               // FC24
 
+        /// <summary>
+        /// This function code is used to send user-defined commands and data to a remote device for remote control or for testing.
+        /// </summary>
+        UmasCode=0x5a,                      // FC90
+
         //
         /// <summary>
         /// This function code is added to another function code to indicate that an error occured.
