@@ -1,0 +1,34 @@
+Source: http://lirasenlared.blogspot.com/2017/08/the-unity-umas-protocol-part-ii.html
+
+Si PLC SIM => utilisation code UMAS 0X20 pour interrogation des sorties
+
+Format de l'interrogation :
+
+00 20 01 <Numero de BLOCK> <STARTOFFSET> <00 00> <Nombre de bytes à lire>
+
+<Numero de BLOCK>, sur 2 octet en Little Indian = 0x42 (42 00 en little indian) pour sortie TOR classique (Q), 0x45 pour entrée TOR classique (I), 0xXX pour sortie analogique, 0xXX pour entrée analogique
+<Start OFFSET> = offset de départ (pour lire les sortie d'une carte située après 32 sortie, utiliser un offset de 0x20 (20 00 en little indian)
+<Nombre de bytes à lire> sur 2 octet en little indian = 0x20 pour 32 octet
+
+Format du retour:
+<Code RET UMAS> <00> <Nombre de bytes requeté> <les valeurs des bytes requeté>
+
+<Code RET UMAS> sur un octet= 0xFE si réponse ok
+<Nombre de bytes requeté> sur 2 octet en little indian = reprend le nombre de bytes requeté lors de la requete
+<les valeurs des bytes requeté> = valeurs des bytes requeté chaque E/S est sur un octet avec pour valeur 0x03 si bit à 1 ou 0x00 si bit à 0 pour les E/S TOR
+
+
+
+utilisation code UMAS 0x21 pour écriture des entrées
+
+Format de l'interrogation:
+
+00 21 01 <Numero de BLOCK> <STARTOFFSET> <00 00> <Nombre de bytes à écrire> <bytes à écrire>
+<Numero de BLOCK>, sur 2 octet en Little Indian = 0x42 (42 00 en little indian) pour sortie TOR classique (Q), 0x45 pour entrée TOR classique (I), 0xXX pour sortie analogique, 0xXX pour entrée analogique
+<Start OFFSET> = offset de départ (pour lire les sortie d'une carte située après 32 sortie, utiliser un offset de 0x20 (20 00 en little indian)
+<Nombre de bytes à écrire> sur 2 octet en little indian = 0x20 pour 32 octet
+ <bytes à écrire>sur 1 octet chacun en little indian = byte à écrire 
+
+Format du retour:
+<Code RET UMAS>
+<Code RET UMAS> sur un octet= 0xFE si réponse ok
