@@ -6,7 +6,7 @@ Format de l'interrogation :
 
 00 20 01 <Numero de BLOCK> <STARTOFFSET> <00 00> <Nombre de bytes à lire>
 
-<Numero de BLOCK>, sur 2 octet en Little Indian = 0x42 (42 00 en little indian) pour sortie TOR classique (Q), 0x45 pour entrée TOR classique (I), 0xXX pour sortie analogique, 0xXX pour entrée analogique
+<Numero de BLOCK>, sur 2 octet en Little Indian = 0x42 (42 00 en little indian) pour sortie TOR classique (Q), 0x45 pour entrée TOR classique (I), 0xXX pour sortie analogique, 0x4C pour entrée analogique
 <Start OFFSET> = offset de départ (pour lire les sortie d'une carte située après 32 sortie, utiliser un offset de 0x20 (20 00 en little indian)
 <Nombre de bytes à lire> sur 2 octet en little indian = 0x20 pour 32 octet
 
