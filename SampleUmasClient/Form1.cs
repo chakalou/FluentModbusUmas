@@ -75,7 +75,8 @@ namespace SampleUmasClient
             {
                 try
                 {
-                    _client.InitUmasRequest(0);
+                    //_client.InitUmasRequest(0);
+                    _client.UmasReadOutputsFromMemoryBlocks(TypeAPI.PLCSIM,0, 0, 96);
                 }
                 catch (Exception ex)
                 {

@@ -11,7 +11,7 @@ Format de l'interrogation :
 <Nombre de bytes à lire> sur 2 octet en little indian = 0x20 pour 32 octet
 
 Format du retour:
-<Code RET UMAS> <00> <Nombre de bytes requeté> <les valeurs des bytes requeté>
+<Code RET UMAS> <01> <Nombre de bytes requeté> <les valeurs des bytes requeté>
 
 <Code RET UMAS> sur un octet= 0xFE si réponse ok
 <Nombre de bytes requeté> sur 2 octet en little indian = reprend le nombre de bytes requeté lors de la requete

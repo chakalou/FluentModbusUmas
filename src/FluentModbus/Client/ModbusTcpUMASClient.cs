@@ -1,8 +1,26 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-
+/// <summary>
+/// Type of API to determine offset and communicate with the PLC
+/// </summary>
+public enum TypeAPI
+{
+    /// <summary>
+    /// M340 PLC
+    /// </summary>
+    M340 = 0,
+    /// <summary>
+    /// M340 PLC
+    /// </summary>
+    M580 = 1,
+    /// <summary>
+    /// Simulated PLC
+    /// </summary>
+    PLCSIM = 2
+}
 namespace FluentModbus
 {
 
@@ -73,6 +91,118 @@ namespace FluentModbus
             return buffer;
 
 
+        }
+        /// <summary>
+        /// Function to write the inputs of a PLC to the memory blocks (code UMAS 0x21)
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="unitIdentifier"></param>
+        /// <param name="startoffset"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public bool UmasWriteInputWithMemoryBlocks(TypeAPI api, int unitIdentifier, int startoffset, byte[] data)
+        {
+            int memoryblock;
+            switch (api)
+            {
+                case TypeAPI.M340:
+                    memoryblock = 0x00;
+                    break;
+                case TypeAPI.M580:
+                    memoryblock = 0x00;
+                    break;
+                case TypeAPI.PLCSIM:
+                    memoryblock = 0x45;
+                    break;
+                default:
+                    return false;
+            }
+
+            Span<byte> retrequest = Umas_Write_Memoryblock(unitIdentifier, memoryblock, startoffset,data.Length ,data);
+
+            if (retrequest.Length >= 3)
+            {
+                byte[] bytes = retrequest.ToArray();
+                if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private Span<byte> Umas_Write_Memoryblock(int unitIdentifier, int pnumeroblock, int startoffset, int nbBytestoWrite, byte[] pdata)
+        {
+            byte[] data = new byte[9 + pdata.Length];
+            data[0] = 0x01;
+            BitConverter.GetBytes((short)pnumeroblock).CopyTo(data, 1); // Numero de BLOCK
+            BitConverter.GetBytes((short)startoffset).CopyTo(data, 3); // Start OFFSET
+            BitConverter.GetBytes((short)nbBytestoWrite).CopyTo(data, 7); // Nombre de bytes à lire
+            Array.Copy(pdata, 0, data, 9, pdata.Length); // data a ecrire
+            Span<byte> buffer = SendUmasSimpleRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_WRITE_MEMORYBLOCK, data);
+
+            return buffer;
+        }
+        /// <summary>
+        /// Function to read the outputs of a PLC from the memory blocks (code UMAS 0x20)
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="unitIdentifier"></param>
+        /// <param name="startoffset"></param>
+        /// <param name="nbBytestoRead"></param>
+        /// <returns>bytes read in plc or empty</returns>
+        public Span<byte> UmasReadOutputsWithMemoryBlocks(TypeAPI api, int unitIdentifier, int startoffset, int nbBytestoRead)
+        {
+            Span<byte> ret = new Span<byte>();
+            int memoryblock;
+            switch (api)
+            {
+                case TypeAPI.M340:
+                    memoryblock = 0x00;
+                    break;
+                case TypeAPI.M580:
+                    memoryblock = 0x00;
+                    break;
+                case TypeAPI.PLCSIM:
+                    memoryblock = 0x42;
+                    break;
+                default:
+                    return ret;
+            }
+
+            Span<byte> retrequest = Umas_Read_Memoryblock(unitIdentifier, memoryblock, startoffset, nbBytestoRead);
+
+            if (retrequest.Length >= 6)
+            {
+                byte[] bytes = retrequest.ToArray();
+                if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
+                {
+                    int size = BitConverter.ToInt16(bytes, 4);
+                    if (bytes.Length >= 6 + size)
+                        ret = new Span<byte>(bytes, 6, size);
+                }
+            }
+            return ret;
+        }
+        /// <summary>
+        /// Generate a UMAS request to read a memory block from the PLC
+        /// </summary>
+        /// <param name="unitIdentifier"></param>
+        /// <param name="pnumeroblock"></param>
+        /// <param name="startoffset"></param>
+        /// <param name="nbBytestoRead"></param>
+        /// <returns></returns>
+        private Span<byte> Umas_Read_Memoryblock(int unitIdentifier, int pnumeroblock, int startoffset, int nbBytestoRead)
+        {
+            byte[] data = new byte[9];
+            data[0] = 0x01;
+            BitConverter.GetBytes((short)pnumeroblock).CopyTo(data, 1); // Numero de BLOCK
+            BitConverter.GetBytes((short)startoffset).CopyTo(data, 3); // Start OFFSET
+            BitConverter.GetBytes((short)nbBytestoRead).CopyTo(data, 7); // Nombre de bytes à lire
+
+            Span<byte> buffer = SendUmasSimpleRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_READ_MEMORYBLOCK, data);
+
+            return buffer;
         }
 
         /// <summary>
