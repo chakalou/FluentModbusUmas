@@ -15,7 +15,11 @@ Format du retour:
 
 <Code RET UMAS> sur un octet= 0xFE si réponse ok
 <Nombre de bytes requeté> sur 2 octet en little indian = reprend le nombre de bytes requeté lors de la requete
-<les valeurs des bytes requeté> = valeurs des bytes requeté chaque E/S est sur un octet avec pour valeur 0x03 si bit à 1 ou 0x00 si bit à 0 pour les E/S TOR
+<les valeurs des bytes requeté> = valeurs des bytes requeté chaque E/S est sur un octet avec pour valeur 0x03  si bit à 1 (0x04 si forcé) ou 0x00 si bit à 0 pour les E/S TOR
+Composition de l'octet 0000 0000 avec 
+bit 0 et 1  = à 1 lorsque la sortie est à 1
+bit 2 = état forcé
+bit 4 = état vrai API ou simu ? (à confirmer) 
 
 
 
