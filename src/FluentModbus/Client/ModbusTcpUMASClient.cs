@@ -109,7 +109,7 @@ namespace FluentModbus
                     memoryblock = 0x00;
                     break;
                 case TypeAPI.M580:
-                    memoryblock = 0x00;
+                    memoryblock = 0x45;
                     break;
                 case TypeAPI.PLCSIM:
                     memoryblock = 0x45;
@@ -161,7 +161,7 @@ namespace FluentModbus
                     memoryblock = 0x00;
                     break;
                 case TypeAPI.M580:
-                    memoryblock = 0x00;
+                    memoryblock = 0x45;
                     break;
                 case TypeAPI.PLCSIM:
                     memoryblock = 0x42;
