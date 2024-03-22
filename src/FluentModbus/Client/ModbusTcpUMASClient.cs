@@ -21,6 +21,12 @@ public enum TypeAPI
     /// </summary>
     PLCSIM = 2
 }
+
+public enum TypeInfoAPI
+{ 
+    Coils=2,
+    HoldingRegisters=3
+}
 namespace FluentModbus
 {
 
@@ -139,7 +145,7 @@ namespace FluentModbus
             BitConverter.GetBytes((short)startoffset).CopyTo(data, 3); // Start OFFSET
             BitConverter.GetBytes((short)nbBytestoWrite).CopyTo(data, 7); // Nombre de bytes à lire
             Array.Copy(pdata, 0, data, 9, pdata.Length); // data a ecrire
-            Span<byte> buffer = SendUmasSimpleRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_WRITE_MEMORYBLOCK, data);
+            Span<byte> buffer = SendUmasSimpleRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_WRITE_MEMORY_BLOCK, data);
 
             return buffer;
         }
@@ -200,11 +206,57 @@ namespace FluentModbus
             BitConverter.GetBytes((short)startoffset).CopyTo(data, 3); // Start OFFSET
             BitConverter.GetBytes((short)nbBytestoRead).CopyTo(data, 7); // Nombre de bytes à lire
 
-            Span<byte> buffer = SendUmasSimpleRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_READ_MEMORYBLOCK, data);
+            Span<byte> buffer = SendUmasSimpleRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_READ_MEMORY_BLOCK, data);
 
             return buffer;
         }
 
+        public Span<byte> UmasReadCoils(TypeAPI api, int unitIdentifier, int startoffset, int nbBytestoRead)
+        {
+            Span<byte> ret = new Span<byte>();
+            int memoryblock;
+            switch (api)
+            {
+                case TypeAPI.M340:
+                    memoryblock = 0x00;
+                    break;
+                case TypeAPI.M580:
+                    memoryblock = 0x45;
+                    break;
+                case TypeAPI.PLCSIM:
+                    memoryblock = 0x42;
+                    break;
+                default:
+                    return ret;
+            }
+
+            Span<byte> retrequest = UmasReadSystemCoilsAndRegisters(unitIdentifier, TypeInfoAPI.Coils, startoffset, nbBytestoRead);
+
+            if (retrequest.Length >= 6)
+            {
+                byte[] bytes = retrequest.ToArray();
+                if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
+                {
+                    int size = BitConverter.ToInt16(bytes, 4);
+                    if (bytes.Length >= 6 + size)
+                        ret = new Span<byte>(bytes, 6, size);
+                }
+            }
+            return ret;
+        }
+        private Span<byte> UmasReadSystemCoilsAndRegisters(int unitIdentifier,  TypeInfoAPI pdatatype, int startoffset, int nbBytestoRead)
+        {
+            byte[] data = new byte[11];
+            data[0] = 0x01;
+            data[1] = 0x00;
+            data[2] = (byte)pdatatype;//03 Holding Registers, 02 Coils
+            BitConverter.GetBytes((Int32)startoffset).CopyTo(data, 4); // Start OFFSET
+            BitConverter.GetBytes((short)nbBytestoRead).CopyTo(data, 8); // Nombre de bytes à lire
+
+            Span<byte> buffer = SendUmasSimpleRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_READ_COILS_REGISTERS, data);
+
+            return buffer;
+        }
         /// <summary>
         /// //Initiate an UMAS connection with the PLC
         /// </summary>

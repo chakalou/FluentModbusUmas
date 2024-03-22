@@ -9,200 +9,163 @@ namespace FluentModbus
     /// </summary>
     public enum ModbusUmasFunctionCode : byte
     {
-        //Application download to the PLC
+        // Existing entries...
+
         /// <summary>
-        /// Code to Initiate the download of an application to the PLC
+        /// Code to Initialize a UMAS communication
         /// </summary>
-        UMAS_BEGIN_DOWNLOAD = 0x30,
-        /// <summary>
-        /// Code to copy a strategy block of application from engineering station to the PLC
-        /// </summary>
-        UMAS_DOWNLOAD = 0x31,
-        /// <summary>
-        /// Code to End the download of an application to the PLC
-        /// </summary>
-        UMAS_END_DOWNLOAD = 0x32,
-        //Application Management
-        /// <summary>
-        /// Code to Read Ethernet Master Data
-        /// </summary>
-        UMAS_TDA = 0x39,
-        /// <summary>
-        /// Code to Monitor PLC (variables, system bits and words)
-        /// </summary>
-        UMAS_CSA = 0x50,
-        //Application upload from the PLC
-        /// <summary>
-        /// Code to Initiate the upload of an application from the PLC to engeenering station
-        /// </summary>
-        UMAS_BEGIN_UPLOAD = 0x33,
-        /// <summary>
-        /// Code to copy a strategy block of application from the PLC to engineering station
-        /// </summary>
-        UMAS_UPLOAD = 0x34,
-        /// <summary>
-        /// Code to End the download of an application from the PLC to engeenering station
-        /// </summary>
-        UMAS_END_UPLOAD = 0x35,
-        /// <summary>
-        /// Code to Backup or Restore the PLC
-        /// </summary>
-        UMAS_END_BACKUP_RESTORE = 0x36,
-        //Configuration Information requests
+        UMAS_INIT_COMM = 0x01,
+
         /// <summary>
         /// Code to Request a PLC ID
         /// </summary>
-        UMAS_GET_PLC_INFO = 0x02,
+        UMAS_READ_ID = 0x02,
+
+        /// <summary>
+        /// Code to Read Project Information
+        /// </summary>
+        UMAS_READ_PROJECT_INFO = 0x03,
+
+        /// <summary>
+        /// Code to Get internal PLC Info
+        /// </summary>
+        UMAS_READ_PLC_INFO = 0x04,
+
+        /// <summary>
+        /// Code to Get internal PLC SD-Card Info
+        /// </summary>
+        UMAS_READ_CARD_INFO = 0x06,
+
+        /// <summary>
+        /// Code to Sends back data sent to PLC (used for synchronization)
+        /// </summary>
+        UMAS_REPEAT = 0x0A,
+
+        /// <summary>
+        /// Code to Assign an owner to the PLC
+        /// </summary>
+        UMAS_TAKE_PLC_RESERVATION = 0x10,
+
+        /// <summary>
+        /// Code to Release the reservation of a PLC
+        /// </summary>
+        UMAS_RELEASE_PLC_RESERVATION = 0x11,
+
+        /// <summary>
+        /// Code to Keep alive message
+        /// </summary>
+        UMAS_KEEP_ALIVE = 0x12,
+
+        /// <summary>
+        /// Code to Read a memory block of the PLC
+        /// </summary>
+        UMAS_READ_MEMORY_BLOCK = 0x20,
+        /// <summary>
+        /// Code to Write a memory block of the PLC
+        /// </summary>
+        UMAS_WRITE_MEMORY_BLOCK = 0x20,
+        /// <summary>
+        /// Code to Read system bits, system words and strategy variables
+        /// </summary>
+        UMAS_READ_VARIABLES = 0x22,
+
+        /// <summary>
+        /// Code to Write system bits, system words and strategy variables
+        /// </summary>
+        UMAS_WRITE_VARIABLES = 0x23,
+
+        /// <summary>
+        /// Code to Read coils and holding registers from PLC
+        /// </summary>
+        UMAS_READ_COILS_REGISTERS = 0x24,
+
+        /// <summary>
+        /// Code to Write coils and holding registers into PLC
+        /// </summary>
+        UMAS_WRITE_COILS_REGISTERS = 0x25,
+
+        /// <summary>
+        /// Code to Initialize strategy upload (copy from PC to PLC)
+        /// </summary>
+        UMAS_INITIALIZE_UPLOAD = 0x30,
+
+        /// <summary>
+        /// Code to Upload a strategy block to the PLC
+        /// </summary>
+        UMAS_UPLOAD_BLOCK = 0x31,
+
+        /// <summary>
+        /// Code to Finish strategy upload
+        /// </summary>
+        UMAS_END_STRATEGY_UPLOAD = 0x32,
+
+        /// <summary>
+        /// Code to Initialize strategy download (copy from PLC to PC)
+        /// </summary>
+        UMAS_INITIALIZE_DOWNLOAD = 0x33,
+
+        /// <summary>
+        /// Code to Download a strategy block from the PLC
+        /// </summary>
+        UMAS_DOWNLOAD_BLOCK = 0x34,
+
+        /// <summary>
+        /// Code to Finish strategy download
+        /// </summary>
+        UMAS_END_STRATEGY_DOWNLOAD = 0x35,
+
+        /// <summary>
+        /// Code to Read Ethernet master data
+        /// </summary>
+        UMAS_READ_ETH_MASTER_DATA = 0x39,
+
+        /// <summary>
+        /// Code to Starts the PLC
+        /// </summary>
+        UMAS_START_PLC = 0x40,
+
+        /// <summary>
+        /// Code to Stops the PLC
+        /// </summary>
+        UMAS_STOP_PLC = 0x41,
+
+        /// <summary>
+        /// Code to Monitors variables, systems bits and words
+        /// </summary>
+        UMAS_MONITOR_PLC = 0x50,
+
+        /// <summary>
+        /// Code to Check PLC connection status
+        /// </summary>
+        UMAS_CHECK_PLC = 0x58,
+
+        /// <summary>
+        /// Code to Set a breakpoint on a specified rung
+        /// </summary>
+        UMAS_SET_BREAKPOINT = 0x60,
+
         /// <summary>
         /// Code to Read IO Object
         /// </summary>
         UMAS_READ_IO_OBJECT = 0x70,
+
         /// <summary>
-        /// Code to Read Rack
+        /// Code to Write IO Object
         /// </summary>
-        UMAS_READ_RACK = 0x72,
+        UMAS_WRITE_IO_OBJECT = 0x71,
+
         /// <summary>
-        /// Code to Get Status Module
+        /// Code to Get status module
         /// </summary>
-        UMAS_READ_MODULE = 0x73,
-        //Connection Information requests
-        /// <summary>
-        /// Code to Initiate an UMAS connection with the PLC
-        /// </summary>
-        UMAS_INIT_COMM = 0x01,
-        //Debugging
-        /// <summary>
-        /// Code to Set a Breakpoint
-        /// </summary>
-        UMAS_SET_BREAKPOINT = 0x60,
-        /// <summary>
-        /// Code to Delete a Breakpoint
-        /// </summary>
-        UMAS_DELETE_BREAKPOINT = 0x61,
-        /// <summary>
-        /// Code to Set Over a function
-        /// </summary>
-        UMAS_SETOVER = 0x62,
-        /// <summary>
-        /// Code to Set In a function
-        /// </summary>
-        UMAS_SETIN = 0x63,
-        /// <summary>
-        /// Code to Set Out a function
-        /// </summary>
-        UMAS_SETOUT = 0x64,
-        /// <summary>
-        /// Code to Go to a line
-        /// </summary>
-        UMAS_GOTO = 0x66,
-        /// <summary>
-        /// ????
-        /// </summary>
-        UMAS_PUTRC = 0x6C,
-        /// <summary>
-        /// ????
-        /// </summary>
-        UMAS_PRIVATE = 0x6D,
-        //Plc status commands
-        /// <summary>
-        /// Code to run the PLC
-        /// </summary>
-        UMAS_RUN = 0x40, //Start the PLC
-        /// <summary>
-        /// Code to stop the PLC
-        /// </summary>
-        UMAS_STOP = 0x41, //Stop the PLC
-        /// <summary>
-        /// Code to initialize the PLC
-        /// </summary>
-        UMAS_INIT = 0x42,
-        //plc status requests
-        /// <summary>
-        /// Code to Read the PLC project information
-        /// </summary>
-        UMAS_GET_APPLI_INFO = 0x03, //Read Project Information
-        /// <summary>
-        /// Code to get PLC internal information
-        /// </summary>
-        UMAS_GET_PLC_STATUS = 0x04, //Get internal PLC Information
-        /// <summary>
-        /// Code to get PLC loader information
-        /// </summary>
-        UMAS_GET_LOADER_INFO = 0x05,
-        /// <summary>
-        /// Code to get PLC SD-Card information
-        /// </summary>
-        UMAS_GET_MEMORYCARD_INFO = 0x06, //Get internal PLC SD-Card Information
-        /// <summary>
-        /// Code to get PLC block information
-        /// </summary>
-        UMAS_GET_BLOCK_INFO = 0x07,
-        //Read commands
-        /// <summary>
-        /// Code to Read a memory block
-        /// </summary>
-        UMAS_READ_MEMORYBLOCK = 0x20,
-        /// <summary>
-        /// Code to read a BOL
-        /// </summary>
-        UMAS_READ_BOL = 0x22,
-        /// <summary>
-        /// Code to read a variable list
-        /// </summary>
-        UMAS_READ_VAR_LIST = 0x24,
-        /// <summary>
-        /// Code to Activate or disactivate Data Dictionnary
-        /// </summary>
-        UMAS_DICTIONNARY = 0x26,
-        /// <summary>
-        /// Another code to Activate or disactivate Data Dictionnary
-        /// </summary>
-        UMAS_DICTIONNARY2 = 0x27,
-        /// <summary>
-        /// Code to read a physical address
-        /// </summary>
-        UMAS_READ_PHYSICAL_ADDRESS = 0x28,
-        //Reservation Requests
-        /// <summary>
-        /// Code to take a reservation on the PLC
-        /// </summary>
-        UMAS_TAKE_PLC_RESERVATION = 0x10,
-        /// <summary>
-        /// Code to release a reservation on the PLC
-        /// </summary>
-        UMAS_RELEASE_PLC_RESERVATION = 0x11,
-        /// <summary>
-        /// Code to keep a reservation on the PLC
-        /// </summary>
-        UMAS_KEEP_PLC_RESERVATION = 0x12,
-        //Write commands
-        /// <summary>
-        /// Code to write a memory block
-        /// </summary>
-        UMAS_WRITE_MEMORYBLOCK = 0x21,
-        /// <summary>
-        /// Code to write a BOL
-        /// </summary>
-        UMAS_WRITE_BOL = 0x23,
-        /// <summary>
-        /// Code to write a variable list
-        /// </summary>
-        UMAS_WRITE_VAR_LIST = 0x25,
-        /// <summary>
-        /// Code to write a physical address
-        /// </summary>
-        UMAS_WRITE_PHYSICAL_ADDRESS = 0x29,
-        /// <summary>
-        /// Code to preload blocks
-        /// </summary>
-        UMAS_PRELOAD_BLOCKS = 0x37,
-        /// <summary>
-        /// Code to write a IO Object
-        /// </summary>
-        UMAS_WRITE_IO_OBJECT = 0x71, //WriteIO Object
-        /// <summary>
-        /// Code from PLC for OK a request
-        /// </summary>
-        UMAS_RET_OK_FROM_API = 0xFE
+        UMAS_GET_STATUS_MODULE = 0x73,
+
+    /// <summary>
+    /// Code from PLC for OK a request
+    /// </summary>
+    UMAS_RET_OK_FROM_API = 0xFE,
+    ///<summary>
+    ///Code from PLC for bad a request
+    /// </summary>
+    UMAS_RET_BAD_FROM_API = 0xFD
     }
 }
