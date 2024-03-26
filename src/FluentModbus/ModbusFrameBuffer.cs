@@ -1,6 +1,6 @@
 ﻿using System.Buffers;
 
-namespace FluentModbus
+namespace FluentModbusUmas
 {
     internal class ModbusFrameBuffer : IDisposable
     {

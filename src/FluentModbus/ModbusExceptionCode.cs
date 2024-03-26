@@ -1,4 +1,4 @@
-﻿namespace FluentModbus
+﻿namespace FluentModbusUmas
 {
     /// <summary>
     /// Specifies the Modbus exception type.

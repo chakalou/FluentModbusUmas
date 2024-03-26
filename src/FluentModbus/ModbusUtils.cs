@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 #endif
 
-namespace FluentModbus
+namespace FluentModbusUmas
 {
     internal static class ModbusUtils
     {

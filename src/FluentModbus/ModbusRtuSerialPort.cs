@@ -1,6 +1,6 @@
 ﻿using System.IO.Ports;
 
-namespace FluentModbus
+namespace FluentModbusUmas
 {
     /// <summary>
     /// A wrapper for a <see cref="SerialPort" />.

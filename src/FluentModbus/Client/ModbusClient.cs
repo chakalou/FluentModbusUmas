@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace FluentModbus
+namespace FluentModbusUmas
 {
     /// <summary>
     /// A base class for Modbus client implementations.

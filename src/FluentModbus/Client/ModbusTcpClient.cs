@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
-namespace FluentModbus
+namespace FluentModbusUmas
 {
     /// <summary>
     /// A Modbus TCP client.

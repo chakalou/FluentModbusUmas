@@ -1,4 +1,4 @@
-﻿namespace FluentModbus
+﻿namespace FluentModbusUmas
 {
     /// <summary>
     /// Specifies the action the Modbus server is requested to do.

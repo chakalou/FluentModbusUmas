@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FluentModbus
+namespace FluentModbusUmas
 {
     /// <summary>
     /// Specifies the UMAS action that client can send to control PLC
@@ -83,7 +83,10 @@ namespace FluentModbus
         /// Code to Write coils and holding registers into PLC
         /// </summary>
         UMAS_WRITE_COILS_REGISTERS = 0x25,
-
+        /// <summary>
+        /// Code to Enable / Disable DataDictionnary
+        /// </summary>
+        UMAS_ENABLEDISABLE_DATADICTIONNARY = 0x26,
         /// <summary>
         /// Code to Initialize strategy upload (copy from PC to PLC)
         /// </summary>

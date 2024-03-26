@@ -1,4 +1,4 @@
-﻿namespace FluentModbus
+﻿namespace FluentModbusUmas
 {
     /// <summary>
     /// This exception is used for Modbus protocol errors.

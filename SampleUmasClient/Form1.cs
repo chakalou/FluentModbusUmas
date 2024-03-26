@@ -1,4 +1,4 @@
-using FluentModbus;
+using FluentModbusUmas;
 using System.ComponentModel;
 using System.Net;
 using System.Text;
@@ -20,6 +20,13 @@ namespace SampleUmasClient
             _client = new ModbusUMASTcpClient();
             _client.UmasDataSent += Client_OnDisconnected;
             _client.UmasDataReceived += Client_OnReceive;
+
+            ModbusUmasFunctionCode[] umasvalues = (ModbusUmasFunctionCode[])Enum.GetValues(typeof(ModbusUmasFunctionCode));
+
+            foreach (ModbusUmasFunctionCode item in umasvalues)
+            {
+                cbUMASFonction.Items.Add(item);
+            }
 
         }
 
@@ -69,22 +76,45 @@ namespace SampleUmasClient
             _client.Connect(IPAddress.Parse(tbIP.Text));
         }
 
-        private void bSendInfo_Click(object sender, EventArgs e)
+
+
+        private void bSendInfo_Click_1(object sender, EventArgs e)
         {
-            if (_client.IsConnected)
+
+            try
             {
-                try
+                if (_client.IsConnected)
                 {
+
+                    switch (cbUMASFonction.SelectedItem)
+                    {
+                        case ModbusUmasFunctionCode.UMAS_ENABLEDISABLE_DATADICTIONNARY:
+                            List<APIDictionnaryVariable> liste = _client.Umas_GetDictionnaryVariables(0, TypeAPI.M580);
+                            foreach (APIDictionnaryVariable var in liste)
+                            {
+                                _list.Add(var.Name + " " + var.BlockMemory + " " + var.Address);
+
+                            }
+                            break;
+                        case ModbusUmasFunctionCode.UMAS_READ_MEMORY_BLOCK:
+                            _client.UmasReadOutputsWithMemoryBlocks(TypeAPI.M580, 0, 0, 64);
+                            break;
+                        default:
+                            MessageBox.Show("Envoie fonction non implémenté", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            break;
+
+
+                    }
                     //_client.InitUmasRequest(0);
-                    _client.UmasReadOutputsWithMemoryBlocks(TypeAPI.M580,0, 0, 64);
                 }
-                catch (Exception ex)
-                {
-
-                    _list.Add("Erreur : " + ex.Message);
-                }
+                else
+                    _list.Add("UMAS Client is not connected");
             }
+            catch (Exception ex)
+            {
 
+                _list.Add("Erreur : " + ex.StackTrace);
+            }
         }
     }
 }
