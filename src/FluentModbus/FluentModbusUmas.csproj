@@ -4,7 +4,7 @@
     <Description>Lightweight and fast client and server implementation of the Modbus protocol (TCP/RTU, Sync/Async).</Description>
     <PackageTags>Modbus ModbusTCP ModbusRTU .NET Standard Windows Linux</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>.NET6.0</TargetFrameworks>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <!-- default lang version is 7.3: https://docs.microsoft.com/de-de/dotnet/csharp/language-reference/configure-language-version -->

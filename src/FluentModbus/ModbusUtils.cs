@@ -11,12 +11,8 @@ namespace FluentModbusUmas
 {
     internal static class ModbusUtils
     {
-#if NETSTANDARD2_0
+
         public static bool TryParseEndpoint(ReadOnlySpan<char> value, out IPEndPoint? result)
-#endif
-#if NETSTANDARD2_1_OR_GREATER
-        public static bool TryParseEndpoint(ReadOnlySpan<char> value, [NotNullWhen(true)] out IPEndPoint? result)
-#endif
         {
             var addressLength = value.Length;
             var lastColonPos = value.LastIndexOf(':');
