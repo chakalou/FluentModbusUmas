@@ -89,7 +89,7 @@ namespace SampleUmasClient
                     switch (cbUMASFonction.SelectedItem)
                     {
                         case ModbusUmasFunctionCode.UMAS_ENABLEDISABLE_DATADICTIONNARY:
-                            List<APIDictionnaryVariable> liste = _client.Umas_GetDictionnaryVariables(0, TypeAPI.M580);
+                            List<APIDictionnaryVariable> liste = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
                             foreach (APIDictionnaryVariable var in liste)
                             {
                                 _list.Add(var.Name + " " + var.BlockMemory + " " + var.Address);
