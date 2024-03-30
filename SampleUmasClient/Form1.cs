@@ -12,6 +12,7 @@ namespace SampleUmasClient
         bool _isConnect = false;
         ModbusUMASTcpClient _client;
         BindingList<String> _list = new BindingList<String>();
+        List<APIDictionnaryVariable> _listeVariables = new List<APIDictionnaryVariable>();
 
         public Form1()
         {
@@ -93,15 +94,21 @@ namespace SampleUmasClient
 
                     switch (cbUMASFonction.SelectedItem)
                     {
+                        case ModbusUmasFunctionCode.UMAS_READ_VARIABLES:
+                            _listeVariables = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
+                            if(_listeVariables!=null && _listeVariables.Count > 0)
+                                _client.SetVariablesValueFromREAD_SYSTEMBTISWORD_REQUEST(0, _listeVariables);
+                            break;
+                       
                         case ModbusUmasFunctionCode.UMAS_READ_ID:
                             _client.SendUmasREAD_PLC_ID(0, 0);
-                            _list.Add(_client.PLCName + " " + _client.PLCFWVersion);
+                            _list.Add(_client.PLCName + " FW:" + _client.PLCFWVersion +" State:"+ _client.PLCState);
                             break;
                         case ModbusUmasFunctionCode.UMAS_ENABLEDISABLE_DATADICTIONNARY:
-                            List<APIDictionnaryVariable> liste = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
-                            foreach (APIDictionnaryVariable var in liste)
+                            _listeVariables = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
+                            foreach (APIDictionnaryVariable var in _listeVariables)
                             {
-                                _list.Add(var.Name + " " + var.BlockMemory + " " + var.Address);
+                                _list.Add(var.Name + " BL" + var.BlockMemory.ToString("X") + " BO=" + var.Baseoffset.ToString("X") + " RO="+var.RelativeOffset.ToString("X"));
 
                             }
                             break;

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
@@ -30,7 +31,7 @@ public enum TypeAPI
     /// <summary>
     /// Unknown PLC
     /// </summary>
-    UNKNOWN=3
+    UNKNOWN = 3
 
 }
 public enum APIState
@@ -40,10 +41,50 @@ public enum APIState
     Unknown = 0x03
 
 }
+
+/*[enum uint 8 UmasDataType(uint 8 dataTypeSize, uint 8 requestSize)
+    ['1' BOOL ['1','1']]
+    ['2' UNKNOWN2 ['1','1']]
+    ['3' UNKNOWN3 ['1','1']]
+    ['4' INT ['2', '2']]
+    ['5' UINT ['2','2']]
+    ['6' DINT ['4','3']]
+    ['7' UDINT ['4','3']]
+    ['8' REAL ['4','3']]
+    ['9' STRING ['1','17']]
+    ['10' TIME ['4','3']]
+    ['11' UNKNOWN11 ['1','1']]
+    ['12' UNKNOWN12 ['1','1']]
+    ['13' UNKNOWN13 ['1','1']]
+    ['14' DATE ['4','3']]
+    ['15' TOD ['4','3']]
+    ['16' DT ['4','3']]
+    ['17' UNKNOWN17 ['1','1']]
+    ['18' UNKNOWN18 ['1','1']]
+    ['19' UNKNOWN19 ['1','1']]
+    ['20' UNKNOWN20 ['1','1']]
+    ['21' BYTE ['1','1']]
+    ['22' WORD ['2','2']]
+    ['23' DWORD ['4','3']]
+    ['24' UNKNOWN24 ['1','1']]
+    ['25' EBOOL ['1','1']]
+]*/
 public enum DictionnaryVariableClassType
 {
     BOOL = 0x01,
     INT = 0x04,
+    UINT = 0x05,
+    DINT = 0x06,
+    UDINT = 0x07,
+    REAL = 0x08,
+    STRING = 0x09,
+    TIME = 0x0a,
+    DATE = 0x0e,
+    TOD = 0x0f,
+    DT = 0x10,
+    BYTE = 0x15,
+    WORD = 0x16,
+    DWORD = 0x17,
     EBOOL = 0x19,
     CTU = 0x1a
 }
@@ -54,34 +95,43 @@ public enum DictionnaryVariableClassType
 public class APIDictionnaryVariable
 {
     String _name;
-    Int16 _address;
-    Int16 _blockMemory;
     DictionnaryVariableClassType _variabletype;
+    Int16 _blockMemory;
+    Int16 _relativeOffset;
+    Int16 _baseoffset;
     /// <summary>
     /// Constructeur de APIDictionnaryVariable
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="address"></param>
-    /// <param name="blockMemory"></param>
-    public APIDictionnaryVariable(string name, Int16 address, Int16 blockMemory, DictionnaryVariableClassType variabletype)
+    /// <param name="name">Nom de la variable</param>
+    /// <param name="baseoffset">base offset associé à la variable</param>
+    /// <param name="blockMemory">Block memory associé à la variable</param>
+    /// <param name="relativeOffset">Offset relatif à la variable</param>
+    /// <param name="variabletype">Type de variable</param>
+    public APIDictionnaryVariable(string name, Int16 baseoffset, Int16 relativeOffset, Int16 blockMemory, DictionnaryVariableClassType variabletype)
     {
         _name = name;
-        _address = address;
-        _blockMemory = blockMemory;
         _variabletype = variabletype;
+        _blockMemory = blockMemory;
+        _baseoffset = baseoffset;
+        _relativeOffset = relativeOffset;
     }
     /// <summary>
     /// Nom de la variable
     /// </summary>
     public string Name { get => _name; }
+
     /// <summary>
-    /// Address mémoire de la variable
+    /// Offset relatif à la variable
     /// </summary>
-    public int Address { get => _address; }
+    public Int16 RelativeOffset { get => _relativeOffset; }
+    /// <summary>
+    /// Base offset assocé mémoire de la variable
+    /// </summary>
+    public Int16 Baseoffset { get => _baseoffset; }
     /// <summary>
     /// Bloc mémoire où lire la variable
     /// </summary>
-    public int BlockMemory { get => _blockMemory; }
+    public Int16 BlockMemory { get => _blockMemory; }
     /// <summary>
     /// Type de variable API
     /// </summary>
@@ -189,17 +239,133 @@ namespace FluentModbusUmas
 
 
         }
-        public bool SendUmasREAD_PLC_ID(int uintidentifier, byte pairingkey )
+        public bool SetVariablesValueFromREAD_SYSTEMBTISWORD_REQUEST(int unitIdentifier, List<APIDictionnaryVariable> listevar)
         {
 
-            Span<byte> retrequest = SendUmasRequest(uintidentifier, pairingkey, ModbusUmasFunctionCode.UMAS_READ_ID,null);
+            //format de la requete:
+            //0x0X => nombre de type de variables à lire suivi de la liste des variables à lire
+            //<0xTYPEVALEUR> <0xBB1 0xBB2> <0x01> <0xOF1> <0xof2 0xOF3> <0xNBVALEURALIRE1 0xNBVALEURALIRE2> 
+            if (listevar == null || listevar.Count == 0)
+                return true;
+
+            listevar.OrderBy(x => x.Variabletype).ThenBy(x => x.BlockMemory).ThenBy(x => x.RelativeOffset);
+
+            List<DictionnaryVariableClassType> typevar = listevar.Select(x => x.Variabletype).Distinct().ToList();
+
+            List<byte[]> datavar = new List<byte[]>();
+            foreach (DictionnaryVariableClassType type in typevar)
+            {
+                List<APIDictionnaryVariable> listvar = listevar.FindAll(x => x.Variabletype == type);
+                if (listvar.Count > 0)
+                {
+                    listevar.OrderBy(x => x.BlockMemory).ThenBy(x => x.Baseoffset).ThenBy(x => x.RelativeOffset);
+                    //on prepare les tableaux de data a envoyer
+                    byte[] data = new byte[9];
+                    byte test = 0x10;
+                    /* switch(type)
+                     {
+                         case DictionnaryVariableClassType.BOOL:
+                             test = 0x01;
+                             break;
+                         case DictionnaryVariableClassType.INT:
+                            test = 0x04;
+                             break;
+                         case DictionnaryVariableClassType.UINT:
+                            test = 0x05;
+                             break;
+                         case DictionnaryVariableClassType.DINT:
+                            test = 0x06;
+                             break;
+                         case DictionnaryVariableClassType.UDINT:
+                             test = 0x07;
+                             break;
+                         case DictionnaryVariableClassType.REAL:
+                             test= 0x08;
+                             break;
+                         case DictionnaryVariableClassType.STRING:
+                             test= 0x09;
+                             break;
+                         case DictionnaryVariableClassType.TIME:
+                             test= 0x0a;
+                             break;
+                         case DictionnaryVariableClassType.DATE:
+                             test= 0x0e;
+                             break;
+                         case DictionnaryVariableClassType.TOD:
+                             test = 0x0f;
+                             break;
+                         case DictionnaryVariableClassType.DT:
+                            test = 0x10;
+                             break;
+                         case DictionnaryVariableClassType.BYTE:
+                             test = 0x15;
+                             break;
+                         case DictionnaryVariableClassType.WORD:
+                             test = 0x16;
+                             break;
+                         case DictionnaryVariableClassType.DWORD:
+                            test = 0x17;
+                             break;
+                         case DictionnaryVariableClassType.EBOOL:
+                             test = 0x19;
+                             break;
+                         case DictionnaryVariableClassType.CTU:
+                            test = 0x1a;
+                             break;
+                         default:
+                             return false;
+                     }*/
+                    data[0] = test;
+                    Int16 blockMemory = listvar[0].BlockMemory;
+                    byte[] blockMemoryBytes = BitConverter.GetBytes(blockMemory);
+                    Array.Reverse(blockMemoryBytes);
+                    Array.Copy(blockMemoryBytes, 0, data, 1, 2);
+                    data[3] = 0x01;
+                    Array.Copy(BitConverter.GetBytes((Int16)listvar[0].Baseoffset), 0, data, 4, 1);
+                    Array.Copy(BitConverter.GetBytes((Int16)listvar[0].RelativeOffset), 0, data, 5, 2);
+                    Array.Copy(BitConverter.GetBytes((Int16)listvar.Count), 0, data, 7, 2);
+
+                    datavar.Add(data);
+                }
+            }
+            int numberoftype = listevar.Select(x => x.Variabletype).Distinct().Count();
+            if(_cRCShifted==null && !SendUmas_READ_PLC_INFO(unitIdentifier))
+                return false;
+
+            int tailletotal= _cRCShifted.Length + 1 + datavar.Count * 9;
+
+            byte[] datafinal = new byte[tailletotal];
+            datafinal[0] = (byte)numberoftype;
+            Array.Copy(_cRCShifted, 0, datafinal, 1, _cRCShifted.Length);
+            int position = 1 + _cRCShifted.Length;
+            foreach (byte[] data in datavar)
+            {
+                Array.Copy(data, 0, datafinal, position, data.Length);
+                position += data.Length;
+            }
+
+            SendUmasRequest(unitIdentifier, _pairing_key, ModbusUmasFunctionCode.UMAS_READ_VARIABLES, datafinal);
+
+      
+            return true;
+        }
+        /// <summary>
+        /// Send a READ_PLC_ID request to the PLC in order to get the PLC name and firmware version
+        /// </summary>
+        /// <param name="unitIdentifier"></param>
+        /// <param name="pairingkey"></param>
+        /// <returns></returns>
+        public bool SendUmasREAD_PLC_ID(int unitIdentifier, byte pairingkey)
+        {
+
+            Span<byte> retrequest = SendUmasRequest(unitIdentifier, pairingkey, ModbusUmasFunctionCode.UMAS_READ_ID, null);
             if (retrequest.Length >= 3)
             {
                 byte[] bytes = retrequest.ToArray();
                 if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
                 {
                     //on récupère le nom de la CPU
-                    byte idlength=bytes[25];
+                    byte idlength = bytes[25];
                     // Extraire les bytes requis
                     byte[] subBytes = new byte[idlength];
                     Array.Copy(bytes, 26, subBytes, 0, idlength);
@@ -210,7 +376,7 @@ namespace FluentModbusUmas
                     //on récupère les infos sur le firmware
                     _fwversion = bytes[12].ToString("X2") + "." + bytes[11].ToString("X2");
 
-                    return true;
+                    return SendUmas_READ_PLC_INFO(unitIdentifier);
                 }
             }
             return false;
@@ -279,7 +445,7 @@ namespace FluentModbusUmas
             List<APIDictionnaryVariable> listeret = new List<APIDictionnaryVariable>();
             //Si on a pas le code CRC de l'API, on va le chercher
             if (_cRCFromPLC == null)
-                SendUmas_READ_PLC_INFO();
+                SendUmas_READ_PLC_INFO(unitIdentifier);
 
 
 
@@ -317,12 +483,15 @@ namespace FluentModbusUmas
                     {
                         if (position + 8 < rebytes.Length)
                         {
+                            bool test = BitConverter.IsLittleEndian;
                             DictionnaryVariableClassType variabletype = (DictionnaryVariableClassType)rebytes[position];
-                            position = position + 2;
+                            position = position + 1;
                             Int16 blockMemory = BitConverter.ToInt16(rebytes, position);
                             position = position + 2;
-                            Int16 address = BitConverter.ToInt16(rebytes, position);
-                            position = position + 6;
+                            Int16 relativeoffset = BitConverter.ToInt16(rebytes, position);
+                            position = position + 2;
+                            Int16 baseoffset = BitConverter.ToInt16(rebytes, position);
+                            position = position + 5;
 
                             string nom = "";
                             while (position < rebytes.Length && rebytes[position] != 0x00)
@@ -333,7 +502,7 @@ namespace FluentModbusUmas
                             //On est arrivé au dernier caractère => on augmente de 1 la position
                             position++;
                             if (nom != "")
-                                listeret.Add(new APIDictionnaryVariable(nom, address, blockMemory, variabletype));
+                                listeret.Add(new APIDictionnaryVariable(nom, baseoffset, relativeoffset, blockMemory, variabletype));
 
                         }
 
@@ -471,9 +640,9 @@ namespace FluentModbusUmas
         /// Send a 0X04 (READ_PLC_INFO) in order to get info from PLC and CRC byte[]
         /// </summary>
         /// <returns></returns>
-        private bool SendUmas_READ_PLC_INFO()
+        private bool SendUmas_READ_PLC_INFO(int unitIdentifier)
         {
-            Span<byte> retrequest = SendUmasRequest(0, _pairing_key, ModbusUmasFunctionCode.UMAS_READ_PLC_INFO, null);
+            Span<byte> retrequest = SendUmasRequest(unitIdentifier, _pairing_key, ModbusUmasFunctionCode.UMAS_READ_PLC_INFO, null);
 
 
             if (retrequest.Length >= 64)
