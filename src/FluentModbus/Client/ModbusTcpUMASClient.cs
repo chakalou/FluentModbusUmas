@@ -4,9 +4,12 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 /// <summary>
 /// Type of API to determine offset and communicate with the PLC
 /// </summary>
@@ -23,12 +26,26 @@ public enum TypeAPI
     /// <summary>
     /// Simulated PLC
     /// </summary>
-    PLCSIM = 2
-}
+    PLCSIM = 2,
+    /// <summary>
+    /// Unknown PLC
+    /// </summary>
+    UNKNOWN=3
 
+}
+public enum APIState
+{
+    Stop = 0x01,
+    Run = 0x02,
+    Unknown = 0x03
+
+}
 public enum DictionnaryVariableClassType
 {
-    BOOL = 0x01, INT = 0x04, EBOOL = 0x19, CTU = 0x1a
+    BOOL = 0x01,
+    INT = 0x04,
+    EBOOL = 0x19,
+    CTU = 0x1a
 }
 
 /// <summary>
@@ -53,10 +70,22 @@ public class APIDictionnaryVariable
         _blockMemory = blockMemory;
         _variabletype = variabletype;
     }
-
+    /// <summary>
+    /// Nom de la variable
+    /// </summary>
     public string Name { get => _name; }
+    /// <summary>
+    /// Address mémoire de la variable
+    /// </summary>
     public int Address { get => _address; }
+    /// <summary>
+    /// Bloc mémoire où lire la variable
+    /// </summary>
     public int BlockMemory { get => _blockMemory; }
+    /// <summary>
+    /// Type de variable API
+    /// </summary>
+    public DictionnaryVariableClassType Variabletype { get => _variabletype; }
 }
 public enum TypeInfoAPI
 {
@@ -98,6 +127,13 @@ namespace FluentModbusUmas
     /// </summary>
     public class ModbusUMASTcpClient : ModbusTcpClient
     {
+        String _fwversion;
+        String _plcName = "";
+        TypeAPI _typeAPI;
+        APIState _aPIState = APIState.Unknown;
+        public String PLCFWVersion { get { return _fwversion; } }
+        public String PLCName { get { return _plcName; } }
+        public String PLCState { get { return _aPIState.ToString(); } }
         byte[]? _cRCFromPLC;
         byte[]? _cRCShifted;
         /// <summary>
@@ -125,6 +161,14 @@ namespace FluentModbusUmas
             _timerUmasSendCdG = new Timer(_UmasTimerSendWdGRequest);
         }
 
+        /// <summary>
+        /// Function to send an UmasRequestTo PLC and get the reponse back
+        /// </summary>
+        /// <param name="unitIdentifier"></param>
+        /// <param name="p_pairing_key"></param>
+        /// <param name="pCode"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         private Span<byte> SendUmasRequest(int unitIdentifier, byte p_pairing_key, ModbusUmasFunctionCode pCode, byte[]? data)
         {
 
@@ -145,6 +189,33 @@ namespace FluentModbusUmas
 
 
         }
+        public bool SendUmasREAD_PLC_ID(int uintidentifier, byte pairingkey )
+        {
+
+            Span<byte> retrequest = SendUmasRequest(uintidentifier, pairingkey, ModbusUmasFunctionCode.UMAS_READ_ID,null);
+            if (retrequest.Length >= 3)
+            {
+                byte[] bytes = retrequest.ToArray();
+                if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
+                {
+                    //on récupère le nom de la CPU
+                    byte idlength=bytes[25];
+                    // Extraire les bytes requis
+                    byte[] subBytes = new byte[idlength];
+                    Array.Copy(bytes, 26, subBytes, 0, idlength);
+
+                    // Convertir les bytes en string en spécifiant l'encodage
+                    _plcName = Encoding.UTF8.GetString(subBytes); // Vous pouvez changer l'encodage si nécessaire
+
+                    //on récupère les infos sur le firmware
+                    _fwversion = bytes[12].ToString("X2") + "." + bytes[11].ToString("X2");
+
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Function to write the inputs of a PLC to the memory blocks (code UMAS 0x21)
         /// </summary>
@@ -336,7 +407,7 @@ namespace FluentModbusUmas
             return buffer;
         }
 
-        public Span<byte> UmasReadCoils(TypeAPI api, int unitIdentifier, int startoffset, int nbBytestoRead)
+        public Span<byte> SendUmasReadCoils(TypeAPI api, int unitIdentifier, int startoffset, int nbBytestoRead)
         {
             Span<byte> ret = new Span<byte>();
             int memoryblock;
@@ -405,11 +476,20 @@ namespace FluentModbusUmas
             Span<byte> retrequest = SendUmasRequest(0, _pairing_key, ModbusUmasFunctionCode.UMAS_READ_PLC_INFO, null);
 
 
-            if (retrequest.Length >= 15)
+            if (retrequest.Length >= 64)
             {
                 byte[] bytes = retrequest.ToArray();
                 if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
                 {
+                    try
+                    {
+                        _aPIState = (APIState)bytes[63];
+                    }
+                    catch (Exception)
+                    {
+
+                        _aPIState = APIState.Unknown;
+                    }
                     _cRCFromPLC = new byte[4];
                     _cRCShifted = new byte[4];
                     //On récuprère le CRC qui est normalement à la 11ème position

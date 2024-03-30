@@ -18,7 +18,7 @@ namespace SampleUmasClient
             InitializeComponent();
             lbLog.DataSource = _list;
             _client = new ModbusUMASTcpClient();
-            _client.UmasDataSent += Client_OnDisconnected;
+            _client.UmasDataSent += Client_OnSend;
             _client.UmasDataReceived += Client_OnReceive;
 
             ModbusUmasFunctionCode[] umasvalues = (ModbusUmasFunctionCode[])Enum.GetValues(typeof(ModbusUmasFunctionCode));
@@ -30,10 +30,15 @@ namespace SampleUmasClient
 
         }
 
-        private void Client_OnDisconnected(object? sender, ModbusUmasDataSentEventArgs e)
+        private void Client_OnSend(object? sender, ModbusUmasDataSentEventArgs e)
         {
             if (e.Data != null)
-                _list.Add("TX:" + BitConverter.ToString(e.Data));
+            {
+                byte test = (byte)e.FunctionCode;
+                    _list.Add("TX:" +test.ToString("X2")+" "+ BitConverter.ToString(e.Data));
+      
+            }
+
 
         }
 
@@ -60,7 +65,7 @@ namespace SampleUmasClient
         {
             _isConnect = false;
             bConnect.Text = "Connect";
-            bConnect.BackColor = Color.Green;
+            bConnect.BackColor = Color.Red;
             bConnect.ForeColor = Color.White;
             _list.Add("Disconnected");
             _client.Disconnect();
@@ -70,8 +75,8 @@ namespace SampleUmasClient
         {
             _isConnect = true;
             bConnect.Text = "Disconnect";
-            bConnect.BackColor = Color.Red;
-            bConnect.ForeColor = Color.White;
+            bConnect.BackColor = Color.Green;
+            bConnect.ForeColor = Color.Black;
             _list.Add("Connected");
             _client.Connect(IPAddress.Parse(tbIP.Text));
         }
@@ -88,6 +93,10 @@ namespace SampleUmasClient
 
                     switch (cbUMASFonction.SelectedItem)
                     {
+                        case ModbusUmasFunctionCode.UMAS_READ_ID:
+                            _client.SendUmasREAD_PLC_ID(0, 0);
+                            _list.Add(_client.PLCName + " " + _client.PLCFWVersion);
+                            break;
                         case ModbusUmasFunctionCode.UMAS_ENABLEDISABLE_DATADICTIONNARY:
                             List<APIDictionnaryVariable> liste = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
                             foreach (APIDictionnaryVariable var in liste)
