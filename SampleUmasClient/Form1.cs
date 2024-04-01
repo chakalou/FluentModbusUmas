@@ -1,4 +1,5 @@
 using FluentModbusUmas;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
 using System.Text;
@@ -10,7 +11,7 @@ namespace SampleUmasClient
     {
 
         bool _isConnect = false;
-        ModbusUMASTcpClient _client;
+        ModbusUMASTcpClient? _client;
         BindingList<String> _list = new BindingList<String>();
         List<APIDictionnaryVariable> _listeVariables = new List<APIDictionnaryVariable>();
 
@@ -28,6 +29,10 @@ namespace SampleUmasClient
             {
                 cbUMASFonction.Items.Add(item);
             }
+            lbCPU.Text = "";
+            lbCRC.Text = "";
+            lbFW.Text = "";
+            lbCRCSHIFTED.Text = "";
 
         }
 
@@ -36,8 +41,8 @@ namespace SampleUmasClient
             if (e.Data != null)
             {
                 byte test = (byte)e.FunctionCode;
-                    _list.Add("TX:" +test.ToString("X2")+" "+ BitConverter.ToString(e.Data));
-      
+                _list.Add("TX:" + test.ToString("X2") + " " + BitConverter.ToString(e.Data));
+
             }
 
 
@@ -74,12 +79,28 @@ namespace SampleUmasClient
 
         private void Connect()
         {
-            _isConnect = true;
-            bConnect.Text = "Disconnect";
-            bConnect.BackColor = Color.Green;
-            bConnect.ForeColor = Color.Black;
-            _list.Add("Connected");
             _client.Connect(IPAddress.Parse(tbIP.Text));
+            if (_client.IsConnected)
+            {
+                bConnect.BackColor = Color.Green;
+                bConnect.ForeColor = Color.Black;
+                _list.Add("Connected");
+                bConnect.Text = "Disconnect";
+                _isConnect = true;
+
+                if (_client.SendUmasREAD_PLC_ID(0, 0))
+                {
+                    lbCPU.Text = _client.PLCName;
+                    lbFW.Text = _client.PLCFWVersion;
+                }
+                if (_client.SendUmas_READ_PLC_INFO(0))
+                {
+                    if (_client.CRCFromPLC != null)
+                        lbCRC.Text = BitConverter.ToString(_client.CRCFromPLC);
+                    if (_client.CRCShiftedFromPLC != null)
+                        lbCRCSHIFTED.Text = BitConverter.ToString(_client.CRCShiftedFromPLC);
+                }
+            }
         }
 
 
@@ -96,24 +117,52 @@ namespace SampleUmasClient
                     {
                         case ModbusUmasFunctionCode.UMAS_READ_VARIABLES:
                             _listeVariables = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
-                            if(_listeVariables!=null && _listeVariables.Count > 0)
+                            if (_listeVariables != null && _listeVariables.Count > 0)
                                 _client.SetVariablesValueFromREAD_SYSTEMBTISWORD_REQUEST(0, _listeVariables);
                             break;
-                       
+
                         case ModbusUmasFunctionCode.UMAS_READ_ID:
                             _client.SendUmasREAD_PLC_ID(0, 0);
-                            _list.Add(_client.PLCName + " FW:" + _client.PLCFWVersion +" State:"+ _client.PLCState);
+                            _list.Add(_client.PLCName + " FW:" + _client.PLCFWVersion + " State:" + _client.PLCState);
                             break;
                         case ModbusUmasFunctionCode.UMAS_ENABLEDISABLE_DATADICTIONNARY:
                             _listeVariables = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
                             foreach (APIDictionnaryVariable var in _listeVariables)
                             {
-                                _list.Add(var.Name + " BL" + var.BlockMemory.ToString("X") + " BO=" + var.Baseoffset.ToString("X") + " RO="+var.RelativeOffset.ToString("X"));
+                                _list.Add(var.Name + " BL" + var.BlockMemory.ToString("X") + " BO=" + var.Baseoffset.ToString("X") + " RO=" + var.RelativeOffset.ToString("X"));
 
                             }
                             break;
                         case ModbusUmasFunctionCode.UMAS_READ_MEMORY_BLOCK:
-                            _client.UmasReadOutputsWithMemoryBlocks(TypeAPI.M580, 0, 0, 64);
+
+                            if (_listeVariables != null)
+                            {
+                                List<APIDictionnaryVariable> _sortedlist = _listeVariables.FindAll(x => x.Variabletype == DictionnaryVariableClassType.EBOOL);
+                                if (_sortedlist != null)
+                                {
+                                    _sortedlist.OrderBy(x => x.BlockMemory).ThenBy(x => x.RelativeOffset).ToList();
+
+                                    int memoryblock = -1;
+                                    int minoffset = -1;
+                                    int maxoffset = -1;
+                                    List<APIDictionnaryVariable> _valuestorefresh;
+
+                                    foreach (var aPIDictionnaryVariable in _sortedlist)
+                                    {
+                                        if (memoryblock == -1)
+                                        {
+
+                                            continue;
+                                        }
+
+                                    }
+                                }
+
+                                APIDictionnaryVariable? item = _listeVariables.FirstOrDefault(x => x.Variabletype == DictionnaryVariableClassType.EBOOL);
+                                if (item != null)
+                                    _client.UmasReadVariablesFromMemoryBlocks(0, (byte)item.BlockMemory, item.RelativeOffset, 1);
+
+                            }
                             break;
                         default:
                             MessageBox.Show("Envoie fonction non implémenté", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);

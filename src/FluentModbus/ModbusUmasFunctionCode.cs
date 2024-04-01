@@ -63,7 +63,7 @@ namespace FluentModbusUmas
         /// <summary>
         /// Code to Write a memory block of the PLC
         /// </summary>
-        UMAS_WRITE_MEMORY_BLOCK = 0x20,
+        UMAS_WRITE_MEMORY_BLOCK = 0x21,
         /// <summary>
         /// Code to Read system bits, system words and strategy variables
         /// </summary>

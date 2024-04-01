@@ -97,7 +97,7 @@ public class APIDictionnaryVariable
     String _name;
     DictionnaryVariableClassType _variabletype;
     Int16 _blockMemory;
-    Int16 _relativeOffset;
+    byte _relativeOffset;
     Int16 _baseoffset;
     /// <summary>
     /// Constructeur de APIDictionnaryVariable
@@ -107,7 +107,7 @@ public class APIDictionnaryVariable
     /// <param name="blockMemory">Block memory associé à la variable</param>
     /// <param name="relativeOffset">Offset relatif à la variable</param>
     /// <param name="variabletype">Type de variable</param>
-    public APIDictionnaryVariable(string name, Int16 baseoffset, Int16 relativeOffset, Int16 blockMemory, DictionnaryVariableClassType variabletype)
+    public APIDictionnaryVariable(string name, Int16 baseoffset, byte relativeOffset, Int16 blockMemory, DictionnaryVariableClassType variabletype)
     {
         _name = name;
         _variabletype = variabletype;
@@ -123,7 +123,7 @@ public class APIDictionnaryVariable
     /// <summary>
     /// Offset relatif à la variable
     /// </summary>
-    public Int16 RelativeOffset { get => _relativeOffset; }
+    public byte RelativeOffset { get => _relativeOffset; }
     /// <summary>
     /// Base offset assocé mémoire de la variable
     /// </summary>
@@ -202,7 +202,7 @@ namespace FluentModbusUmas
         /// Retourne le
         /// </summary>
         public byte[]? CRCFromPLC { get { if (_cRCFromPLC == null) return null; else return _cRCFromPLC; } }
-
+        public byte[]? CRCShiftedFromPLC { get { if (_cRCShifted == null) return null; else return _cRCShifted; } }
         /// <summary>
         /// Creates a new Modbus TCP UMAS client for communication with a schneider PLC.
         /// </summary>
@@ -260,11 +260,11 @@ namespace FluentModbusUmas
                 {
                     listevar.OrderBy(x => x.BlockMemory).ThenBy(x => x.Baseoffset).ThenBy(x => x.RelativeOffset);
                     //on prepare les tableaux de data a envoyer
-                    byte[] data = new byte[9];
-                    byte test = 0x10;
-                    /* switch(type)
+                    byte[] data = new byte[7];
+                    byte vartype = 0xFF;
+                    switch(type)
                      {
-                         case DictionnaryVariableClassType.BOOL:
+                         /*case DictionnaryVariableClassType.BOOL:
                              test = 0x01;
                              break;
                          case DictionnaryVariableClassType.INT:
@@ -299,44 +299,49 @@ namespace FluentModbusUmas
                              break;
                          case DictionnaryVariableClassType.BYTE:
                              test = 0x15;
-                             break;
+                             break;*/
                          case DictionnaryVariableClassType.WORD:
-                             test = 0x16;
+                            vartype = 0x02;
                              break;
-                         case DictionnaryVariableClassType.DWORD:
+                         /*case DictionnaryVariableClassType.DWORD:
                             test = 0x17;
-                             break;
+                             break;*/
                          case DictionnaryVariableClassType.EBOOL:
-                             test = 0x19;
+                            vartype = 0x00;
                              break;
+                            /*
                          case DictionnaryVariableClassType.CTU:
                             test = 0x1a;
-                             break;
+                             break;*/
                          default:
                              return false;
-                     }*/
-                    data[0] = test;
+                     }
+                    data[0] = vartype;
                     Int16 blockMemory = listvar[0].BlockMemory;
-                    byte[] blockMemoryBytes = BitConverter.GetBytes(blockMemory);
-                    Array.Reverse(blockMemoryBytes);
-                    Array.Copy(blockMemoryBytes, 0, data, 1, 2);
+                    Array.Copy(BitConverter.GetBytes(blockMemory), 0, data, 1, 2);
                     data[3] = 0x01;
                     Array.Copy(BitConverter.GetBytes((Int16)listvar[0].Baseoffset), 0, data, 4, 1);
-                    Array.Copy(BitConverter.GetBytes((Int16)listvar[0].RelativeOffset), 0, data, 5, 2);
-                    Array.Copy(BitConverter.GetBytes((Int16)listvar.Count), 0, data, 7, 2);
+                    data[6] = listevar[0].RelativeOffset;
 
                     datavar.Add(data);
                 }
             }
-            int numberoftype = listevar.Select(x => x.Variabletype).Distinct().Count();
+            List<DictionnaryVariableClassType> listetype = new List<DictionnaryVariableClassType>();
+            foreach (var item in listevar)
+            {
+                if(!listetype.Contains(item.Variabletype))
+                    listetype.Add(item.Variabletype);
+            }
+            int numberoftype=listetype.Count;
+            //int numberoftype = listevar.Select(x => x.Variabletype).Distinct().Count();
             if(_cRCShifted==null && !SendUmas_READ_PLC_INFO(unitIdentifier))
                 return false;
 
-            int tailletotal= _cRCShifted.Length + 1 + datavar.Count * 9;
+            int tailletotal= _cRCShifted.Length + 1 + datavar.Count * datavar[0].Length;
 
             byte[] datafinal = new byte[tailletotal];
-            datafinal[0] = (byte)numberoftype;
-            Array.Copy(_cRCShifted, 0, datafinal, 1, _cRCShifted.Length);
+            datafinal[4] = (byte)numberoftype;
+            Array.Copy(_cRCShifted, 0, datafinal, 0, _cRCShifted.Length);
             int position = 1 + _cRCShifted.Length;
             foreach (byte[] data in datavar)
             {
@@ -385,29 +390,14 @@ namespace FluentModbusUmas
         /// <summary>
         /// Function to write the inputs of a PLC to the memory blocks (code UMAS 0x21)
         /// </summary>
-        /// <param name="api"></param>
+        /// <param name="memoryblock"></param>
         /// <param name="unitIdentifier"></param>
         /// <param name="startoffset"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public bool UmasWriteInputWithMemoryBlocks(TypeAPI api, int unitIdentifier, int startoffset, byte[] data)
+        public bool UmasWriteInputWithMemoryBlocks( int unitIdentifier, int memoryblock, int startoffset, byte[] data)
         {
-            int memoryblock;
-            switch (api)
-            {
-                case TypeAPI.M340:
-                    memoryblock = 0x00;
-                    break;
-                case TypeAPI.M580:
-                    memoryblock = 0x45;
-                    break;
-                case TypeAPI.PLCSIM:
-                    memoryblock = 0x45;
-                    break;
-                default:
-                    return false;
-            }
-
+          
             Span<byte> retrequest = Umas_Write_Memoryblock(unitIdentifier, memoryblock, startoffset, data.Length, data);
 
             if (retrequest.Length >= 3)
@@ -425,9 +415,9 @@ namespace FluentModbusUmas
         {
             byte[] data = new byte[9 + pdata.Length];
             data[0] = 0x01;
-            BitConverter.GetBytes((short)pnumeroblock).CopyTo(data, 1); // Numero de BLOCK
+            BitConverter.GetBytes((Int16)pnumeroblock).CopyTo(data, 1); // Numero de BLOCK
             BitConverter.GetBytes((short)startoffset).CopyTo(data, 3); // Start OFFSET
-            BitConverter.GetBytes((short)nbBytestoWrite).CopyTo(data, 7); // Nombre de bytes à lire
+            BitConverter.GetBytes((short)nbBytestoWrite).CopyTo(data, 7); // Nombre de bytes à écrire
             Array.Copy(pdata, 0, data, 9, pdata.Length); // data a ecrire
             Span<byte> buffer = SendUmasRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_WRITE_MEMORY_BLOCK, data);
 
@@ -485,11 +475,11 @@ namespace FluentModbusUmas
                         {
                             bool test = BitConverter.IsLittleEndian;
                             DictionnaryVariableClassType variabletype = (DictionnaryVariableClassType)rebytes[position];
-                            position = position + 1;
+                            position = position + 2;
                             Int16 blockMemory = BitConverter.ToInt16(rebytes, position);
                             position = position + 2;
-                            Int16 relativeoffset = BitConverter.ToInt16(rebytes, position);
-                            position = position + 2;
+                            byte relativeoffset = rebytes[position];
+                            position = position + 1;
                             Int16 baseoffset = BitConverter.ToInt16(rebytes, position);
                             position = position + 5;
 
@@ -515,32 +505,18 @@ namespace FluentModbusUmas
             return listeret;
         }
         /// <summary>
-        /// Function to read the outputs of a PLC from the memory blocks (code UMAS 0x20)
+        /// Function to read the a variable (ebool, adressed words of a PLC from the memory blocks value (code UMAS 0x20) 
+        /// => can get block number and offset from Datadictionnary request if enabled (0x26), if not: maybe from 0x01 or 0x03 but cannot get it firgured out at this time...
         /// </summary>
-        /// <param name="api"></param>
         /// <param name="unitIdentifier"></param>
+        /// <param name="memoryblock"></param>
         /// <param name="startoffset"></param>
         /// <param name="nbBytestoRead"></param>
         /// <returns>bytes read in plc or empty</returns>
-        public Span<byte> UmasReadOutputsWithMemoryBlocks(TypeAPI api, int unitIdentifier, int startoffset, int nbBytestoRead)
+        public Span<byte> UmasReadVariablesFromMemoryBlocks(/*TypeAPI api,*/ int unitIdentifier, byte memoryblock, int startoffset, int nbBytestoRead)
         {
             Span<byte> ret = new Span<byte>();
-            int memoryblock;
-            switch (api)
-            {
-                case TypeAPI.M340:
-                    memoryblock = 0x00;
-                    break;
-                case TypeAPI.M580:
-                    memoryblock = 0x45;
-                    break;
-                case TypeAPI.PLCSIM:
-                    memoryblock = 0x42;
-                    break;
-                default:
-                    return ret;
-            }
-
+           
             Span<byte> retrequest = Umas_Read_Memoryblock(unitIdentifier, memoryblock, startoffset, nbBytestoRead);
 
             if (retrequest.Length >= 6)
@@ -567,7 +543,7 @@ namespace FluentModbusUmas
         {
             byte[] data = new byte[9];
             data[0] = 0x01;
-            BitConverter.GetBytes((short)pnumeroblock).CopyTo(data, 1); // Numero de BLOCK
+            BitConverter.GetBytes((Int16)pnumeroblock).CopyTo(data, 1); // Numero de BLOCK
             BitConverter.GetBytes((short)startoffset).CopyTo(data, 3); // Start OFFSET
             BitConverter.GetBytes((short)nbBytestoRead).CopyTo(data, 7); // Nombre de bytes à lire
 
@@ -576,39 +552,7 @@ namespace FluentModbusUmas
             return buffer;
         }
 
-        public Span<byte> SendUmasReadCoils(TypeAPI api, int unitIdentifier, int startoffset, int nbBytestoRead)
-        {
-            Span<byte> ret = new Span<byte>();
-            int memoryblock;
-            switch (api)
-            {
-                case TypeAPI.M340:
-                    memoryblock = 0x00;
-                    break;
-                case TypeAPI.M580:
-                    memoryblock = 0x45;
-                    break;
-                case TypeAPI.PLCSIM:
-                    memoryblock = 0x42;
-                    break;
-                default:
-                    return ret;
-            }
-
-            Span<byte> retrequest = UmasReadSystemCoilsAndRegisters(unitIdentifier, TypeInfoAPI.Coils, startoffset, nbBytestoRead);
-
-            if (retrequest.Length >= 6)
-            {
-                byte[] bytes = retrequest.ToArray();
-                if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
-                {
-                    int size = BitConverter.ToInt16(bytes, 4);
-                    if (bytes.Length >= 6 + size)
-                        ret = new Span<byte>(bytes, 6, size);
-                }
-            }
-            return ret;
-        }
+ 
         private Span<byte> UmasReadSystemCoilsAndRegisters(int unitIdentifier, TypeInfoAPI pdatatype, int startoffset, int nbBytestoRead)
         {
             byte[] data = new byte[11];
@@ -640,7 +584,7 @@ namespace FluentModbusUmas
         /// Send a 0X04 (READ_PLC_INFO) in order to get info from PLC and CRC byte[]
         /// </summary>
         /// <returns></returns>
-        private bool SendUmas_READ_PLC_INFO(int unitIdentifier)
+        public bool SendUmas_READ_PLC_INFO(int unitIdentifier)
         {
             Span<byte> retrequest = SendUmasRequest(unitIdentifier, _pairing_key, ModbusUmasFunctionCode.UMAS_READ_PLC_INFO, null);
 
