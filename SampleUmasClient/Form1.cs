@@ -178,7 +178,23 @@ namespace SampleUmasClient
                                                 List<APIDictionnaryVariable> _sortedblock = _sortedlist.Where(_listeVariables => _listeVariables.BlockMemory == memoryblock).ToList();
                                                 foreach (var aPIDictionnaryVariablebis in _sortedblock)
                                                 {
-                                                    aPIDictionnaryVariablebis.Valeur = ret[(aPIDictionnaryVariablebis.RelativeOffset - minoffset) * aPIDictionnaryVariablebis.VariableLength];
+                                                    byte[] tab = new byte[aPIDictionnaryVariablebis.VariableLength];
+                                                     Array.Copy(ret.ToArray(), aPIDictionnaryVariablebis.RelativeOffset - minoffset,tab,0, aPIDictionnaryVariablebis.VariableLength);
+                                                    switch (tab.Length)
+                                                    {
+                                                        case 1:
+                                                            aPIDictionnaryVariablebis.Valeur = tab[0];
+                                                            break;
+                                                        case 2:
+                                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt16(tab);
+                                                            break;
+                                                        case 4:
+                                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
+                                                            break;
+                                                        default:
+                                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
+                                                            break;
+                                                    }
                                                 }
                                             }
                                             memoryblock = aPIDictionnaryVariable.BlockMemory;
@@ -191,14 +207,30 @@ namespace SampleUmasClient
                                     if(memoryblock!=-1)
                                     {
                                         Span<byte> ret = _client.UmasReadVariablesFromMemoryBlocks(0, (byte)memoryblock, minoffset, maxoffset - minoffset +length);
-
                                         if (ret != null)
                                         {
 
                                             List<APIDictionnaryVariable> _sortedblock = _sortedlist.Where(_listeVariables => _listeVariables.BlockMemory == memoryblock).ToList();
                                             foreach (var aPIDictionnaryVariablebis in _sortedblock)
                                             {
-                                                aPIDictionnaryVariablebis.Valeur = ret[(aPIDictionnaryVariablebis.RelativeOffset- minoffset) * aPIDictionnaryVariablebis.VariableLength];
+                                                byte[] tab = new byte[aPIDictionnaryVariablebis.VariableLength];
+                                                Array.Copy(ret.ToArray(), aPIDictionnaryVariablebis.RelativeOffset - minoffset, tab, 0, aPIDictionnaryVariablebis.VariableLength);
+                                               switch(tab.Length)
+                                                {
+                                                    case 1:
+                                                        aPIDictionnaryVariablebis.Valeur = tab[0];
+                                                        break;
+                                                    case 2:
+                                                        aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt16(tab);
+                                                        break;
+                                                    case 4:
+                                                        aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
+                                                        break;
+                                                    default:
+                                                        aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
+                                                        break;
+                                                }
+                                                
                                             }
                                         }
                                     }
