@@ -33,6 +33,7 @@ namespace SampleUmasClient
             lbCRC.Text = "";
             lbFW.Text = "";
             lbCRCSHIFTED.Text = "";
+            aPIDictionnaryVariableBindingSource.DataSource = _listeVariables;
 
         }
 
@@ -137,7 +138,7 @@ namespace SampleUmasClient
 
                             if (_listeVariables != null)
                             {
-                                List<APIDictionnaryVariable> _sortedlist = _listeVariables.FindAll(x => x.Variabletype == DictionnaryVariableClassType.EBOOL);
+                                List<APIDictionnaryVariable> _sortedlist = _listeVariables;
                                 if (_sortedlist != null)
                                 {
                                     _sortedlist.OrderBy(x => x.BlockMemory).ThenBy(x => x.RelativeOffset).ToList();
@@ -145,22 +146,67 @@ namespace SampleUmasClient
                                     int memoryblock = -1;
                                     int minoffset = -1;
                                     int maxoffset = -1;
-                                    List<APIDictionnaryVariable> _valuestorefresh;
-
+                                    int length = -1;
                                     foreach (var aPIDictionnaryVariable in _sortedlist)
                                     {
+                                        //Si memoryblock = -1 alors c'est le premier
                                         if (memoryblock == -1)
                                         {
-
+                                            memoryblock = aPIDictionnaryVariable.BlockMemory;
+                                            minoffset = aPIDictionnaryVariable.RelativeOffset;
+                                            maxoffset = aPIDictionnaryVariable.RelativeOffset;
                                             continue;
+                                        }
+                                        //Si le memoryblock est le même que le précédent on met à jour les offset min et max
+                                        if (memoryblock == aPIDictionnaryVariable.BlockMemory)
+                                        {
+                                            if (aPIDictionnaryVariable.RelativeOffset < minoffset)
+                                                minoffset = aPIDictionnaryVariable.RelativeOffset;
+                                            if (aPIDictionnaryVariable.RelativeOffset > maxoffset)
+                                                maxoffset = aPIDictionnaryVariable.RelativeOffset;
+                                            length=aPIDictionnaryVariable.VariableLength;
+                                            continue;
+                                        }
+                                        else
+                                        {
+                                            //sinon : on change de memoryblock => on envoie la requête pour récupérer les valeurs
+                                          Span<byte>ret= _client.UmasReadVariablesFromMemoryBlocks(0, (byte)memoryblock, minoffset, maxoffset - minoffset + length);
+
+                                            if (ret != null)
+                                            {
+
+                                                List<APIDictionnaryVariable> _sortedblock = _sortedlist.Where(_listeVariables => _listeVariables.BlockMemory == memoryblock).ToList();
+                                                foreach (var aPIDictionnaryVariablebis in _sortedblock)
+                                                {
+                                                    aPIDictionnaryVariablebis.Valeur = ret[(aPIDictionnaryVariablebis.RelativeOffset - minoffset) * aPIDictionnaryVariablebis.VariableLength];
+                                                }
+                                            }
+                                            memoryblock = aPIDictionnaryVariable.BlockMemory;
+                                            minoffset = aPIDictionnaryVariable.RelativeOffset;
+                                            maxoffset = aPIDictionnaryVariable.RelativeOffset;
+                                            length = aPIDictionnaryVariable.VariableLength;
                                         }
 
                                     }
+                                    if(memoryblock!=-1)
+                                    {
+                                        Span<byte> ret = _client.UmasReadVariablesFromMemoryBlocks(0, (byte)memoryblock, minoffset, maxoffset - minoffset +length);
+
+                                        if (ret != null)
+                                        {
+
+                                            List<APIDictionnaryVariable> _sortedblock = _sortedlist.Where(_listeVariables => _listeVariables.BlockMemory == memoryblock).ToList();
+                                            foreach (var aPIDictionnaryVariablebis in _sortedblock)
+                                            {
+                                                aPIDictionnaryVariablebis.Valeur = ret[(aPIDictionnaryVariablebis.RelativeOffset- minoffset) * aPIDictionnaryVariablebis.VariableLength];
+                                            }
+                                        }
+                                    }
                                 }
 
-                                APIDictionnaryVariable? item = _listeVariables.FirstOrDefault(x => x.Variabletype == DictionnaryVariableClassType.EBOOL);
-                                if (item != null)
-                                    _client.UmasReadVariablesFromMemoryBlocks(0, (byte)item.BlockMemory, item.RelativeOffset, 1);
+                                //APIDictionnaryVariable? item = _listeVariables.FirstOrDefault(x => x.Variabletype == DictionnaryVariableClassType.EBOOL);
+                                //if (item != null)
+                                //    _client.UmasReadVariablesFromMemoryBlocks(0, (byte)item.BlockMemory, item.RelativeOffset, 1);
 
                             }
                             break;
@@ -179,6 +225,11 @@ namespace SampleUmasClient
             {
 
                 _list.Add("Erreur : " + ex.StackTrace);
+            }
+            finally
+            {
+                aPIDictionnaryVariableBindingSource.DataSource=_listeVariables;
+                aPIDictionnaryVariableBindingSource.ResetBindings(false);
             }
         }
     }

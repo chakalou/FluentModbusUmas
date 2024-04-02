@@ -28,234 +28,313 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.bConnect = new System.Windows.Forms.Button();
-            this.tbIP = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cbUMASFonction = new System.Windows.Forms.ComboBox();
-            this.bSendInfo = new System.Windows.Forms.Button();
-            this.lbLog = new System.Windows.Forms.ListBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.lbCRC = new System.Windows.Forms.Label();
-            this.lbCRCSHIFTED = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.lbCPU = new System.Windows.Forms.Label();
-            this.lbFW = new System.Windows.Forms.Label();
-            this.tableLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            tableLayoutPanel2 = new TableLayoutPanel();
+            bConnect = new Button();
+            tbIP = new TextBox();
+            label1 = new Label();
+            cbUMASFonction = new ComboBox();
+            bSendInfo = new Button();
+            label4 = new Label();
+            lbCPU = new Label();
+            label5 = new Label();
+            lbFW = new Label();
+            label2 = new Label();
+            lbCRC = new Label();
+            label3 = new Label();
+            lbCRCSHIFTED = new Label();
+            dataGridView1 = new DataGridView();
+            nameDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            relativeOffsetDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            baseoffsetDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            blockMemoryDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            variabletypeDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            valeurDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            aPIDictionnaryVariableBindingSource = new BindingSource(components);
+            lbLog = new ListBox();
+            tableLayoutPanel1.SuspendLayout();
+            tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)aPIDictionnaryVariableBindingSource).BeginInit();
+            SuspendLayout();
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 1;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 48.61432F));
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.lbLog, 0, 1);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(866, 554);
-            this.tableLayoutPanel1.TabIndex = 0;
+            tableLayoutPanel1.ColumnCount = 1;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 48.61432F));
+            tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 0);
+            tableLayoutPanel1.Controls.Add(lbLog, 0, 1);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(0, 0);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 2;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 68.95307F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 31.0469322F));
+            tableLayoutPanel1.Size = new Size(866, 554);
+            tableLayoutPanel1.TabIndex = 0;
             // 
             // tableLayoutPanel2
             // 
-            this.tableLayoutPanel2.ColumnCount = 4;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.Controls.Add(this.bConnect, 2, 0);
-            this.tableLayoutPanel2.Controls.Add(this.tbIP, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.cbUMASFonction, 1, 1);
-            this.tableLayoutPanel2.Controls.Add(this.bSendInfo, 2, 1);
-            this.tableLayoutPanel2.Controls.Add(this.label2, 0, 2);
-            this.tableLayoutPanel2.Controls.Add(this.label3, 0, 3);
-            this.tableLayoutPanel2.Controls.Add(this.lbCRC, 1, 2);
-            this.tableLayoutPanel2.Controls.Add(this.lbCRCSHIFTED, 1, 3);
-            this.tableLayoutPanel2.Controls.Add(this.label4, 2, 2);
-            this.tableLayoutPanel2.Controls.Add(this.label5, 2, 3);
-            this.tableLayoutPanel2.Controls.Add(this.lbCPU, 3, 2);
-            this.tableLayoutPanel2.Controls.Add(this.lbFW, 3, 3);
-            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 5;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(860, 271);
-            this.tableLayoutPanel2.TabIndex = 0;
+            tableLayoutPanel2.ColumnCount = 7;
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.2857113F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.2857151F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.2857151F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.2857151F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.2857151F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.2857151F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.2857151F));
+            tableLayoutPanel2.Controls.Add(bConnect, 2, 0);
+            tableLayoutPanel2.Controls.Add(tbIP, 1, 0);
+            tableLayoutPanel2.Controls.Add(label1, 0, 0);
+            tableLayoutPanel2.Controls.Add(bSendInfo, 2, 1);
+            tableLayoutPanel2.Controls.Add(label4, 3, 0);
+            tableLayoutPanel2.Controls.Add(lbCPU, 4, 0);
+            tableLayoutPanel2.Controls.Add(label5, 3, 1);
+            tableLayoutPanel2.Controls.Add(lbFW, 4, 1);
+            tableLayoutPanel2.Controls.Add(label2, 5, 0);
+            tableLayoutPanel2.Controls.Add(lbCRC, 6, 0);
+            tableLayoutPanel2.Controls.Add(label3, 5, 1);
+            tableLayoutPanel2.Controls.Add(lbCRCSHIFTED, 6, 1);
+            tableLayoutPanel2.Controls.Add(dataGridView1, 0, 2);
+            tableLayoutPanel2.Controls.Add(cbUMASFonction, 0, 1);
+            tableLayoutPanel2.Dock = DockStyle.Fill;
+            tableLayoutPanel2.Location = new Point(3, 3);
+            tableLayoutPanel2.Name = "tableLayoutPanel2";
+            tableLayoutPanel2.RowCount = 7;
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tableLayoutPanel2.Size = new Size(860, 376);
+            tableLayoutPanel2.TabIndex = 0;
             // 
             // bConnect
             // 
-            this.bConnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.bConnect.Location = new System.Drawing.Point(433, 8);
-            this.bConnect.Name = "bConnect";
-            this.bConnect.Size = new System.Drawing.Size(209, 38);
-            this.bConnect.TabIndex = 0;
-            this.bConnect.Text = "Connect";
-            this.bConnect.UseVisualStyleBackColor = true;
-            this.bConnect.Click += new System.EventHandler(this.bConnect_Click);
+            bConnect.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            bConnect.Location = new Point(247, 7);
+            bConnect.Name = "bConnect";
+            bConnect.Size = new Size(116, 38);
+            bConnect.TabIndex = 0;
+            bConnect.Text = "Connect";
+            bConnect.UseVisualStyleBackColor = true;
+            bConnect.Click += bConnect_Click;
             // 
             // tbIP
             // 
-            this.tbIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbIP.Location = new System.Drawing.Point(218, 15);
-            this.tbIP.Name = "tbIP";
-            this.tbIP.Size = new System.Drawing.Size(209, 23);
-            this.tbIP.TabIndex = 1;
+            tbIP.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            tbIP.Location = new Point(125, 15);
+            tbIP.Name = "tbIP";
+            tbIP.Size = new Size(116, 23);
+            tbIP.TabIndex = 1;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Location = new System.Drawing.Point(3, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(209, 54);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "IP";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            label1.AutoSize = true;
+            label1.Dock = DockStyle.Fill;
+            label1.Location = new Point(3, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(116, 53);
+            label1.TabIndex = 2;
+            label1.Text = "IP";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // cbUMASFonction
             // 
-            this.cbUMASFonction.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbUMASFonction.FormattingEnabled = true;
-            this.cbUMASFonction.Location = new System.Drawing.Point(218, 69);
-            this.cbUMASFonction.Name = "cbUMASFonction";
-            this.cbUMASFonction.Size = new System.Drawing.Size(209, 23);
-            this.cbUMASFonction.TabIndex = 4;
+            cbUMASFonction.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            tableLayoutPanel2.SetColumnSpan(cbUMASFonction, 2);
+            cbUMASFonction.FormattingEnabled = true;
+            cbUMASFonction.Location = new Point(3, 68);
+            cbUMASFonction.Name = "cbUMASFonction";
+            cbUMASFonction.Size = new Size(238, 23);
+            cbUMASFonction.TabIndex = 4;
             // 
             // bSendInfo
             // 
-            this.bSendInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.bSendInfo.Location = new System.Drawing.Point(433, 64);
-            this.bSendInfo.Name = "bSendInfo";
-            this.bSendInfo.Size = new System.Drawing.Size(209, 34);
-            this.bSendInfo.TabIndex = 3;
-            this.bSendInfo.Text = "SendRequest";
-            this.bSendInfo.UseVisualStyleBackColor = true;
-            this.bSendInfo.Click += new System.EventHandler(this.bSendInfo_Click_1);
-            // 
-            // lbLog
-            // 
-            this.lbLog.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbLog.FormattingEnabled = true;
-            this.lbLog.ItemHeight = 15;
-            this.lbLog.Location = new System.Drawing.Point(3, 280);
-            this.lbLog.Name = "lbLog";
-            this.lbLog.Size = new System.Drawing.Size(860, 271);
-            this.lbLog.TabIndex = 1;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Location = new System.Drawing.Point(3, 108);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(209, 54);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "CRC";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Location = new System.Drawing.Point(3, 162);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(209, 54);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "CRC SHIFTED";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbCRC
-            // 
-            this.lbCRC.AutoSize = true;
-            this.lbCRC.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbCRC.Location = new System.Drawing.Point(218, 108);
-            this.lbCRC.Name = "lbCRC";
-            this.lbCRC.Size = new System.Drawing.Size(209, 54);
-            this.lbCRC.TabIndex = 7;
-            this.lbCRC.Text = "label4";
-            this.lbCRC.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbCRCSHIFTED
-            // 
-            this.lbCRCSHIFTED.AutoSize = true;
-            this.lbCRCSHIFTED.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbCRCSHIFTED.Location = new System.Drawing.Point(218, 162);
-            this.lbCRCSHIFTED.Name = "lbCRCSHIFTED";
-            this.lbCRCSHIFTED.Size = new System.Drawing.Size(209, 54);
-            this.lbCRCSHIFTED.TabIndex = 8;
-            this.lbCRCSHIFTED.Text = "label5";
-            this.lbCRCSHIFTED.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            bSendInfo.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            bSendInfo.Location = new Point(247, 62);
+            bSendInfo.Name = "bSendInfo";
+            bSendInfo.Size = new Size(116, 34);
+            bSendInfo.TabIndex = 3;
+            bSendInfo.Text = "SendRequest";
+            bSendInfo.UseVisualStyleBackColor = true;
+            bSendInfo.Click += bSendInfo_Click_1;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Location = new System.Drawing.Point(433, 108);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(209, 54);
-            this.label4.TabIndex = 9;
-            this.label4.Text = "CPU";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Location = new System.Drawing.Point(433, 162);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(209, 54);
-            this.label5.TabIndex = 10;
-            this.label5.Text = "Firmware";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            label4.AutoSize = true;
+            label4.Dock = DockStyle.Fill;
+            label4.Location = new Point(369, 0);
+            label4.Name = "label4";
+            label4.Size = new Size(116, 53);
+            label4.TabIndex = 9;
+            label4.Text = "CPU";
+            label4.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lbCPU
             // 
-            this.lbCPU.AutoSize = true;
-            this.lbCPU.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbCPU.Location = new System.Drawing.Point(648, 108);
-            this.lbCPU.Name = "lbCPU";
-            this.lbCPU.Size = new System.Drawing.Size(209, 54);
-            this.lbCPU.TabIndex = 11;
-            this.lbCPU.Text = "label6";
-            this.lbCPU.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            lbCPU.AutoSize = true;
+            lbCPU.Dock = DockStyle.Fill;
+            lbCPU.Location = new Point(491, 0);
+            lbCPU.Name = "lbCPU";
+            lbCPU.Size = new Size(116, 53);
+            lbCPU.TabIndex = 11;
+            lbCPU.Text = "label6";
+            lbCPU.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Dock = DockStyle.Fill;
+            label5.Location = new Point(369, 53);
+            label5.Name = "label5";
+            label5.Size = new Size(116, 53);
+            label5.TabIndex = 10;
+            label5.Text = "Firmware";
+            label5.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lbFW
             // 
-            this.lbFW.AutoSize = true;
-            this.lbFW.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbFW.Location = new System.Drawing.Point(648, 162);
-            this.lbFW.Name = "lbFW";
-            this.lbFW.Size = new System.Drawing.Size(209, 54);
-            this.lbFW.TabIndex = 12;
-            this.lbFW.Text = "label7";
-            this.lbFW.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            lbFW.AutoSize = true;
+            lbFW.Dock = DockStyle.Fill;
+            lbFW.Location = new Point(491, 53);
+            lbFW.Name = "lbFW";
+            lbFW.Size = new Size(116, 53);
+            lbFW.TabIndex = 12;
+            lbFW.Text = "label7";
+            lbFW.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Dock = DockStyle.Fill;
+            label2.Location = new Point(613, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(116, 53);
+            label2.TabIndex = 5;
+            label2.Text = "CRC";
+            label2.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lbCRC
+            // 
+            lbCRC.AutoSize = true;
+            lbCRC.Dock = DockStyle.Fill;
+            lbCRC.Location = new Point(735, 0);
+            lbCRC.Name = "lbCRC";
+            lbCRC.Size = new Size(122, 53);
+            lbCRC.TabIndex = 7;
+            lbCRC.Text = "label4";
+            lbCRC.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Dock = DockStyle.Fill;
+            label3.Location = new Point(613, 53);
+            label3.Name = "label3";
+            label3.Size = new Size(116, 53);
+            label3.TabIndex = 6;
+            label3.Text = "CRC SHIFTED";
+            label3.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lbCRCSHIFTED
+            // 
+            lbCRCSHIFTED.AutoSize = true;
+            lbCRCSHIFTED.Dock = DockStyle.Fill;
+            lbCRCSHIFTED.Location = new Point(735, 53);
+            lbCRCSHIFTED.Name = "lbCRCSHIFTED";
+            lbCRCSHIFTED.Size = new Size(122, 53);
+            lbCRCSHIFTED.TabIndex = 8;
+            lbCRCSHIFTED.Text = "label5";
+            lbCRCSHIFTED.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.AutoGenerateColumns = false;
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { nameDataGridViewTextBoxColumn, relativeOffsetDataGridViewTextBoxColumn, baseoffsetDataGridViewTextBoxColumn, blockMemoryDataGridViewTextBoxColumn, variabletypeDataGridViewTextBoxColumn, valeurDataGridViewTextBoxColumn });
+            tableLayoutPanel2.SetColumnSpan(dataGridView1, 7);
+            dataGridView1.DataSource = aPIDictionnaryVariableBindingSource;
+            dataGridView1.Dock = DockStyle.Fill;
+            dataGridView1.Location = new Point(3, 109);
+            dataGridView1.Name = "dataGridView1";
+            tableLayoutPanel2.SetRowSpan(dataGridView1, 5);
+            dataGridView1.RowTemplate.Height = 25;
+            dataGridView1.Size = new Size(854, 264);
+            dataGridView1.TabIndex = 13;
+            // 
+            // nameDataGridViewTextBoxColumn
+            // 
+            nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
+            nameDataGridViewTextBoxColumn.HeaderText = "Name";
+            nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
+            nameDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // relativeOffsetDataGridViewTextBoxColumn
+            // 
+            relativeOffsetDataGridViewTextBoxColumn.DataPropertyName = "RelativeOffset";
+            relativeOffsetDataGridViewTextBoxColumn.HeaderText = "RelativeOffset";
+            relativeOffsetDataGridViewTextBoxColumn.Name = "relativeOffsetDataGridViewTextBoxColumn";
+            relativeOffsetDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // baseoffsetDataGridViewTextBoxColumn
+            // 
+            baseoffsetDataGridViewTextBoxColumn.DataPropertyName = "Baseoffset";
+            baseoffsetDataGridViewTextBoxColumn.HeaderText = "Baseoffset";
+            baseoffsetDataGridViewTextBoxColumn.Name = "baseoffsetDataGridViewTextBoxColumn";
+            baseoffsetDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // blockMemoryDataGridViewTextBoxColumn
+            // 
+            blockMemoryDataGridViewTextBoxColumn.DataPropertyName = "BlockMemory";
+            blockMemoryDataGridViewTextBoxColumn.HeaderText = "BlockMemory";
+            blockMemoryDataGridViewTextBoxColumn.Name = "blockMemoryDataGridViewTextBoxColumn";
+            blockMemoryDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // variabletypeDataGridViewTextBoxColumn
+            // 
+            variabletypeDataGridViewTextBoxColumn.DataPropertyName = "Variabletype";
+            variabletypeDataGridViewTextBoxColumn.HeaderText = "Variabletype";
+            variabletypeDataGridViewTextBoxColumn.Name = "variabletypeDataGridViewTextBoxColumn";
+            variabletypeDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // valeurDataGridViewTextBoxColumn
+            // 
+            valeurDataGridViewTextBoxColumn.DataPropertyName = "Valeur";
+            valeurDataGridViewTextBoxColumn.HeaderText = "Valeur";
+            valeurDataGridViewTextBoxColumn.Name = "valeurDataGridViewTextBoxColumn";
+            // 
+            // aPIDictionnaryVariableBindingSource
+            // 
+            aPIDictionnaryVariableBindingSource.DataSource = typeof(APIDictionnaryVariable);
+            // 
+            // lbLog
+            // 
+            lbLog.Dock = DockStyle.Fill;
+            lbLog.FormattingEnabled = true;
+            lbLog.ItemHeight = 15;
+            lbLog.Location = new Point(3, 385);
+            lbLog.Name = "lbLog";
+            lbLog.Size = new Size(860, 166);
+            lbLog.TabIndex = 1;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(866, 554);
-            this.Controls.Add(this.tableLayoutPanel1);
-            this.Name = "Form1";
-            this.Text = "Form1";
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel2.ResumeLayout(false);
-            this.tableLayoutPanel2.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(866, 554);
+            Controls.Add(tableLayoutPanel1);
+            Name = "Form1";
+            Text = "Form1";
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel2.ResumeLayout(false);
+            tableLayoutPanel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)aPIDictionnaryVariableBindingSource).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -276,5 +355,13 @@
         private Label label5;
         private Label lbCPU;
         private Label lbFW;
+        private DataGridView dataGridView1;
+        private DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn relativeOffsetDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn baseoffsetDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn blockMemoryDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn variabletypeDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn valeurDataGridViewTextBoxColumn;
+        private BindingSource aPIDictionnaryVariableBindingSource;
     }
 }

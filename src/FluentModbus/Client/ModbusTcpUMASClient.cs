@@ -99,6 +99,7 @@ public class APIDictionnaryVariable
     Int16 _blockMemory;
     byte _relativeOffset;
     Int16 _baseoffset;
+    int _valeur;
     /// <summary>
     /// Constructeur de APIDictionnaryVariable
     /// </summary>
@@ -114,6 +115,7 @@ public class APIDictionnaryVariable
         _blockMemory = blockMemory;
         _baseoffset = baseoffset;
         _relativeOffset = relativeOffset;
+        _valeur = -1;
     }
     /// <summary>
     /// Nom de la variable
@@ -133,15 +135,66 @@ public class APIDictionnaryVariable
     /// </summary>
     public Int16 BlockMemory { get => _blockMemory; }
     /// <summary>
+    /// Valeur de la variable API
+    /// </summary>
+    public int Valeur { get => _valeur; set => _valeur = value; }
+    /// <summary>
     /// Type de variable API
     /// </summary>
     public DictionnaryVariableClassType Variabletype { get => _variabletype; }
+
+    /// <summary>
+    /// Fontion qui retourne la taille de la variable suivant son type
+    /// </summary>
+    /// <returns></returns>
+    public int VariableLength
+    {
+        get
+        {
+            int ret = 0;
+            switch (Variabletype)
+            {
+                case DictionnaryVariableClassType.BOOL:
+                case DictionnaryVariableClassType.BYTE:
+                case DictionnaryVariableClassType.EBOOL:
+                case DictionnaryVariableClassType.CTU:
+                    ret = 1;
+                    break;
+                case DictionnaryVariableClassType.UINT:
+                case DictionnaryVariableClassType.INT:
+                case DictionnaryVariableClassType.WORD:
+                    ret = 2;
+                    break;
+                case DictionnaryVariableClassType.DINT:
+                case DictionnaryVariableClassType.UDINT:
+                case DictionnaryVariableClassType.REAL:
+                case DictionnaryVariableClassType.TIME:
+                case DictionnaryVariableClassType.DATE:
+                case DictionnaryVariableClassType.TOD:
+                case DictionnaryVariableClassType.DT:
+                case DictionnaryVariableClassType.DWORD:
+                    ret = 3;
+                    break;
+                case DictionnaryVariableClassType.STRING:
+                    ret = 17;
+                    break;
+                default:
+                    ret = 0;
+                    break;
+            }
+
+            return ret;
+
+
+        }
+    }
 }
-public enum TypeInfoAPI
-{
-    Coils = 2,
-    HoldingRegisters = 3
-}
+
+    public enum TypeInfoAPI
+    {
+        Coils = 2,
+        HoldingRegisters = 3
+    }
 
 
 
@@ -262,60 +315,60 @@ namespace FluentModbusUmas
                     //on prepare les tableaux de data a envoyer
                     byte[] data = new byte[7];
                     byte vartype = 0xFF;
-                    switch(type)
-                     {
-                         /*case DictionnaryVariableClassType.BOOL:
-                             test = 0x01;
-                             break;
-                         case DictionnaryVariableClassType.INT:
-                            test = 0x04;
-                             break;
-                         case DictionnaryVariableClassType.UINT:
-                            test = 0x05;
-                             break;
-                         case DictionnaryVariableClassType.DINT:
-                            test = 0x06;
-                             break;
-                         case DictionnaryVariableClassType.UDINT:
-                             test = 0x07;
-                             break;
-                         case DictionnaryVariableClassType.REAL:
-                             test= 0x08;
-                             break;
-                         case DictionnaryVariableClassType.STRING:
-                             test= 0x09;
-                             break;
-                         case DictionnaryVariableClassType.TIME:
-                             test= 0x0a;
-                             break;
-                         case DictionnaryVariableClassType.DATE:
-                             test= 0x0e;
-                             break;
-                         case DictionnaryVariableClassType.TOD:
-                             test = 0x0f;
-                             break;
-                         case DictionnaryVariableClassType.DT:
-                            test = 0x10;
-                             break;
-                         case DictionnaryVariableClassType.BYTE:
-                             test = 0x15;
-                             break;*/
-                         case DictionnaryVariableClassType.WORD:
+                    switch (type)
+                    {
+                        /*case DictionnaryVariableClassType.BOOL:
+                            test = 0x01;
+                            break;
+                        case DictionnaryVariableClassType.INT:
+                           test = 0x04;
+                            break;
+                        case DictionnaryVariableClassType.UINT:
+                           test = 0x05;
+                            break;
+                        case DictionnaryVariableClassType.DINT:
+                           test = 0x06;
+                            break;
+                        case DictionnaryVariableClassType.UDINT:
+                            test = 0x07;
+                            break;
+                        case DictionnaryVariableClassType.REAL:
+                            test= 0x08;
+                            break;
+                        case DictionnaryVariableClassType.STRING:
+                            test= 0x09;
+                            break;
+                        case DictionnaryVariableClassType.TIME:
+                            test= 0x0a;
+                            break;
+                        case DictionnaryVariableClassType.DATE:
+                            test= 0x0e;
+                            break;
+                        case DictionnaryVariableClassType.TOD:
+                            test = 0x0f;
+                            break;
+                        case DictionnaryVariableClassType.DT:
+                           test = 0x10;
+                            break;
+                        case DictionnaryVariableClassType.BYTE:
+                            test = 0x15;
+                            break;*/
+                        case DictionnaryVariableClassType.WORD:
                             vartype = 0x02;
-                             break;
-                         /*case DictionnaryVariableClassType.DWORD:
-                            test = 0x17;
-                             break;*/
-                         case DictionnaryVariableClassType.EBOOL:
+                            break;
+                        /*case DictionnaryVariableClassType.DWORD:
+                           test = 0x17;
+                            break;*/
+                        case DictionnaryVariableClassType.EBOOL:
                             vartype = 0x00;
-                             break;
-                            /*
-                         case DictionnaryVariableClassType.CTU:
-                            test = 0x1a;
-                             break;*/
-                         default:
-                             return false;
-                     }
+                            break;
+                        /*
+                     case DictionnaryVariableClassType.CTU:
+                        test = 0x1a;
+                         break;*/
+                        default:
+                            return false;
+                    }
                     data[0] = vartype;
                     Int16 blockMemory = listvar[0].BlockMemory;
                     Array.Copy(BitConverter.GetBytes(blockMemory), 0, data, 1, 2);
@@ -329,15 +382,15 @@ namespace FluentModbusUmas
             List<DictionnaryVariableClassType> listetype = new List<DictionnaryVariableClassType>();
             foreach (var item in listevar)
             {
-                if(!listetype.Contains(item.Variabletype))
+                if (!listetype.Contains(item.Variabletype))
                     listetype.Add(item.Variabletype);
             }
-            int numberoftype=listetype.Count;
+            int numberoftype = listetype.Count;
             //int numberoftype = listevar.Select(x => x.Variabletype).Distinct().Count();
-            if(_cRCShifted==null && !SendUmas_READ_PLC_INFO(unitIdentifier))
+            if (_cRCShifted == null && !SendUmas_READ_PLC_INFO(unitIdentifier))
                 return false;
 
-            int tailletotal= _cRCShifted.Length + 1 + datavar.Count * datavar[0].Length;
+            int tailletotal = _cRCShifted.Length + 1 + datavar.Count * datavar[0].Length;
 
             byte[] datafinal = new byte[tailletotal];
             datafinal[4] = (byte)numberoftype;
@@ -351,7 +404,7 @@ namespace FluentModbusUmas
 
             SendUmasRequest(unitIdentifier, _pairing_key, ModbusUmasFunctionCode.UMAS_READ_VARIABLES, datafinal);
 
-      
+
             return true;
         }
         /// <summary>
@@ -395,9 +448,9 @@ namespace FluentModbusUmas
         /// <param name="startoffset"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public bool UmasWriteInputWithMemoryBlocks( int unitIdentifier, int memoryblock, int startoffset, byte[] data)
+        public bool UmasWriteInputWithMemoryBlocks(int unitIdentifier, int memoryblock, int startoffset, byte[] data)
         {
-          
+
             Span<byte> retrequest = Umas_Write_Memoryblock(unitIdentifier, memoryblock, startoffset, data.Length, data);
 
             if (retrequest.Length >= 3)
@@ -516,7 +569,7 @@ namespace FluentModbusUmas
         public Span<byte> UmasReadVariablesFromMemoryBlocks(/*TypeAPI api,*/ int unitIdentifier, byte memoryblock, int startoffset, int nbBytestoRead)
         {
             Span<byte> ret = new Span<byte>();
-           
+
             Span<byte> retrequest = Umas_Read_Memoryblock(unitIdentifier, memoryblock, startoffset, nbBytestoRead);
 
             if (retrequest.Length >= 6)
@@ -552,7 +605,7 @@ namespace FluentModbusUmas
             return buffer;
         }
 
- 
+
         private Span<byte> UmasReadSystemCoilsAndRegisters(int unitIdentifier, TypeInfoAPI pdatatype, int startoffset, int nbBytestoRead)
         {
             byte[] data = new byte[11];
