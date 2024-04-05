@@ -1,4 +1,6 @@
-﻿namespace SampleUmasClient
+﻿using FluentModbusUmas.Umas;
+
+namespace SampleUmasClient
 {
     partial class Form1
     {

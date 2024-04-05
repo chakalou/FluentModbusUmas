@@ -1,4 +1,5 @@
 using FluentModbusUmas;
+using FluentModbusUmas.Umas;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
@@ -11,17 +12,24 @@ namespace SampleUmasClient
     {
 
         bool _isConnect = false;
-        ModbusUMASTcpClient? _client;
+        ModbusUMASTcpClient _client;
         BindingList<String> _list = new BindingList<String>();
         List<APIDictionnaryVariable> _listeVariables = new List<APIDictionnaryVariable>();
+        private BindingSource _logBindingSource;
 
         public Form1()
         {
             InitializeComponent();
-            lbLog.DataSource = _list;
-            _client = new ModbusUMASTcpClient();
+            _logBindingSource = new BindingSource(components);
+            lbLog.DataSource = _logBindingSource;
+            _logBindingSource.DataSource = typeof(String);
+            ((System.ComponentModel.ISupportInitialize)_logBindingSource).EndInit();
+            _client = new ModbusUMASTcpClient(0);
             _client.UmasDataSent += Client_OnSend;
             _client.UmasDataReceived += Client_OnReceive;
+            _client.APIInfoChanged += Client_APIInfoChanged;
+            _client.APIListVariableUpdated += Client_APIListVariableUpdated;
+            _client.APILog += Client_APILog;
 
             ModbusUmasFunctionCode[] umasvalues = (ModbusUmasFunctionCode[])Enum.GetValues(typeof(ModbusUmasFunctionCode));
 
@@ -37,22 +45,128 @@ namespace SampleUmasClient
 
         }
 
+        private void printLog(String message)
+        {
+            if (lbLog.InvokeRequired)
+            {
+               
+                lbLog.Invoke(new MethodInvoker(delegate
+                {
+                    MajLbLog(message);
+                }));
+               
+            }
+            else
+            {
+                MajLbLog(message);
+            }
+        }
+
+        private void MajLbLog(String message)
+        {
+            if (_list.Count > 30)
+            {
+                _list.RemoveAt(0);
+            }
+            _list.Add(message);
+            _logBindingSource.DataSource = _list;
+            _logBindingSource.ResetBindings(false);
+            if (lbLog.Items.Count > 0)
+                lbLog.TopIndex = lbLog.Items.Count - 1; // Scroll to last item
+        }
+        private void Client_APILog(object? sender, ModbusUmasAPILogEventArgs e)
+        {
+            printLog(e.Log);
+        }
+        private void Client_APIListVariableUpdated(object? sender, ModbusAPIListVariableUpdatedEventArgs e)
+        {
+            if (_listeVariables != null && _listeVariables.Count == 0 && e.ListVariable != null)
+            {
+                _listeVariables = e.ListVariable;
+            }
+            else
+            {
+                if (e.ListVariableAddedOrChanged != null && _listeVariables != null)
+                {
+                    foreach (APIDictionnaryVariable item in e.ListVariableAddedOrChanged)
+                    {
+                        if (_listeVariables.Find(x => x.Name == item.Name) == null)
+                            _listeVariables.Add(item);
+                    }
+                }
+
+                if (e.ListVariableRemoved!=null && _listeVariables!=null)
+                { 
+                    foreach (APIDictionnaryVariable item in e.ListVariableRemoved)
+                    {
+                        APIDictionnaryVariable? var = _listeVariables.FirstOrDefault(x => x.Name == item.Name);
+                        if (var != null)
+                            _listeVariables.Remove(var);
+                    }
+                }
+                
+            }
+
+            if (dataGridView1.InvokeRequired)
+            {
+                dataGridView1.Invoke(new MethodInvoker(delegate
+                {
+                    aPIDictionnaryVariableBindingSource.DataSource = _listeVariables;
+                    aPIDictionnaryVariableBindingSource.ResetBindings(false);
+                }));
+            }
+            else
+            {
+                aPIDictionnaryVariableBindingSource.DataSource = _listeVariables;
+                aPIDictionnaryVariableBindingSource.ResetBindings(false);
+            }
+        }
+        private void Client_APIInfoChanged(object? sender, EventArgs e)
+        {
+
+            if (lbCPU.InvokeRequired)
+            {
+                lbCPU.Invoke(new MethodInvoker(delegate
+                {
+                    lbCPU.Text = _client.PLCName;
+                    lbFW.Text = _client.PLCFWVersion;
+
+                    if (_client.CRCFromPLC != null)
+                        lbCRC.Text = BitConverter.ToString(_client.CRCFromPLC);
+                    if (_client.CRCShiftedFromPLC != null)
+                        lbCRCSHIFTED.Text = BitConverter.ToString(_client.CRCShiftedFromPLC);
+                }));
+            }
+            else
+            {
+                lbCPU.Text = _client.PLCName;
+                lbFW.Text = _client.PLCFWVersion;
+
+                if (_client.CRCFromPLC != null)
+                    lbCRC.Text = BitConverter.ToString(_client.CRCFromPLC);
+                if (_client.CRCShiftedFromPLC != null)
+                    lbCRCSHIFTED.Text = BitConverter.ToString(_client.CRCShiftedFromPLC);
+            }
+           
+
+        }
+
         private void Client_OnSend(object? sender, ModbusUmasDataSentEventArgs e)
         {
             if (e.Data != null)
             {
                 byte test = (byte)e.FunctionCode;
-                _list.Add("TX:" + test.ToString("X2") + " " + BitConverter.ToString(e.Data));
+                printLog("TX:" + test.ToString("X2") + " " + BitConverter.ToString(e.Data));
 
             }
 
 
         }
-
+     
         private void Client_OnReceive(object? sender, ModbusUmasDataReceivedEventArgs e)
         {
             if (e.Data != null)
-                _list.Add("RX:" + BitConverter.ToString(e.Data));
+                printLog("RX:" + BitConverter.ToString(e.Data));
 
         }
 
@@ -74,42 +188,41 @@ namespace SampleUmasClient
             bConnect.Text = "Connect";
             bConnect.BackColor = Color.Red;
             bConnect.ForeColor = Color.White;
-            _list.Add("Disconnected");
+            printLog("Disconnected");
             _client.Disconnect();
         }
 
         private void Connect()
         {
-            _client.Connect(IPAddress.Parse(tbIP.Text));
-            if (_client.IsConnected)
+            try
             {
-                bConnect.BackColor = Color.Green;
-                bConnect.ForeColor = Color.Black;
-                _list.Add("Connected");
-                bConnect.Text = "Disconnect";
-                _isConnect = true;
+                _client.Connect(IPAddress.Parse(tbIP.Text));
+                if (_client.IsConnected)
+                {
+                    bConnect.BackColor = Color.Green;
+                    bConnect.ForeColor = Color.Black;
+                    printLog("Connected");
+                    bConnect.Text = "Disconnect";
+                    _isConnect = true;
 
-                if (_client.SendUmasREAD_PLC_ID(0, 0))
-                {
-                    lbCPU.Text = _client.PLCName;
-                    lbFW.Text = _client.PLCFWVersion;
-                }
-                if (_client.SendUmas_READ_PLC_INFO(0))
-                {
-                    if (_client.CRCFromPLC != null)
-                        lbCRC.Text = BitConverter.ToString(_client.CRCFromPLC);
-                    if (_client.CRCShiftedFromPLC != null)
-                        lbCRCSHIFTED.Text = BitConverter.ToString(_client.CRCShiftedFromPLC);
                 }
             }
+            catch (Exception ex)
+            {
+
+                printLog("Error connecting to " + tbIP.Text);
+                printLog("Error : " + ex.Message);
+            }
+            
         }
+
 
 
 
         private void bSendInfo_Click_1(object sender, EventArgs e)
         {
 
-            try
+           /* try
             {
                 if (_client.IsConnected)
                 {
@@ -117,130 +230,21 @@ namespace SampleUmasClient
                     switch (cbUMASFonction.SelectedItem)
                     {
                         case ModbusUmasFunctionCode.UMAS_READ_VARIABLES:
-                            _listeVariables = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
+                           (bool ret, _listeVariables) = _client.MajListVariablesFromDataDictionnary(true);
                             if (_listeVariables != null && _listeVariables.Count > 0)
                                 _client.SetVariablesValueFromREAD_SYSTEMBTISWORD_REQUEST(0, _listeVariables);
                             break;
 
                         case ModbusUmasFunctionCode.UMAS_READ_ID:
-                            _client.SendUmasREAD_PLC_ID(0, 0);
+                            _client.get(0, 0);
                             _list.Add(_client.PLCName + " FW:" + _client.PLCFWVersion + " State:" + _client.PLCState);
                             break;
                         case ModbusUmasFunctionCode.UMAS_ENABLEDISABLE_DATADICTIONNARY:
-                            _listeVariables = _client.SendUmas_GetDictionnaryVariables(0, TypeAPI.M580);
-                            foreach (APIDictionnaryVariable var in _listeVariables)
-                            {
-                                _list.Add(var.Name + " BL" + var.BlockMemory.ToString("X") + " BO=" + var.Baseoffset.ToString("X") + " RO=" + var.RelativeOffset.ToString("X"));
 
-                            }
                             break;
                         case ModbusUmasFunctionCode.UMAS_READ_MEMORY_BLOCK:
 
-                            if (_listeVariables != null)
-                            {
-                                List<APIDictionnaryVariable> _sortedlist = _listeVariables;
-                                if (_sortedlist != null)
-                                {
-                                    _sortedlist.OrderBy(x => x.BlockMemory).ThenBy(x => x.RelativeOffset).ToList();
 
-                                    int memoryblock = -1;
-                                    int minoffset = -1;
-                                    int maxoffset = -1;
-                                    int length = -1;
-                                    foreach (var aPIDictionnaryVariable in _sortedlist)
-                                    {
-                                        //Si memoryblock = -1 alors c'est le premier
-                                        if (memoryblock == -1)
-                                        {
-                                            memoryblock = aPIDictionnaryVariable.BlockMemory;
-                                            minoffset = aPIDictionnaryVariable.RelativeOffset;
-                                            maxoffset = aPIDictionnaryVariable.RelativeOffset;
-                                            continue;
-                                        }
-                                        //Si le memoryblock est le même que le précédent on met à jour les offset min et max
-                                        if (memoryblock == aPIDictionnaryVariable.BlockMemory)
-                                        {
-                                            if (aPIDictionnaryVariable.RelativeOffset < minoffset)
-                                                minoffset = aPIDictionnaryVariable.RelativeOffset;
-                                            if (aPIDictionnaryVariable.RelativeOffset > maxoffset)
-                                                maxoffset = aPIDictionnaryVariable.RelativeOffset;
-                                            length=aPIDictionnaryVariable.VariableLength;
-                                            continue;
-                                        }
-                                        else
-                                        {
-                                            //sinon : on change de memoryblock => on envoie la requête pour récupérer les valeurs
-                                          Span<byte>ret= _client.UmasReadVariablesFromMemoryBlocks(0, (byte)memoryblock, minoffset, maxoffset - minoffset + length);
-
-                                            if (ret != null)
-                                            {
-
-                                                List<APIDictionnaryVariable> _sortedblock = _sortedlist.Where(_listeVariables => _listeVariables.BlockMemory == memoryblock).ToList();
-                                                foreach (var aPIDictionnaryVariablebis in _sortedblock)
-                                                {
-                                                    byte[] tab = new byte[aPIDictionnaryVariablebis.VariableLength];
-                                                     Array.Copy(ret.ToArray(), aPIDictionnaryVariablebis.RelativeOffset - minoffset,tab,0, aPIDictionnaryVariablebis.VariableLength);
-                                                    switch (tab.Length)
-                                                    {
-                                                        case 1:
-                                                            aPIDictionnaryVariablebis.Valeur = tab[0];
-                                                            break;
-                                                        case 2:
-                                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt16(tab);
-                                                            break;
-                                                        case 4:
-                                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
-                                                            break;
-                                                        default:
-                                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
-                                                            break;
-                                                    }
-                                                }
-                                            }
-                                            memoryblock = aPIDictionnaryVariable.BlockMemory;
-                                            minoffset = aPIDictionnaryVariable.RelativeOffset;
-                                            maxoffset = aPIDictionnaryVariable.RelativeOffset;
-                                            length = aPIDictionnaryVariable.VariableLength;
-                                        }
-
-                                    }
-                                    if(memoryblock!=-1)
-                                    {
-                                        Span<byte> ret = _client.UmasReadVariablesFromMemoryBlocks(0, (byte)memoryblock, minoffset, maxoffset - minoffset +length);
-                                        if (ret != null)
-                                        {
-
-                                            List<APIDictionnaryVariable> _sortedblock = _sortedlist.Where(_listeVariables => _listeVariables.BlockMemory == memoryblock).ToList();
-                                            foreach (var aPIDictionnaryVariablebis in _sortedblock)
-                                            {
-                                                byte[] tab = new byte[aPIDictionnaryVariablebis.VariableLength];
-                                                Array.Copy(ret.ToArray(), aPIDictionnaryVariablebis.RelativeOffset - minoffset, tab, 0, aPIDictionnaryVariablebis.VariableLength);
-                                               switch(tab.Length)
-                                                {
-                                                    case 1:
-                                                        aPIDictionnaryVariablebis.Valeur = tab[0];
-                                                        break;
-                                                    case 2:
-                                                        aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt16(tab);
-                                                        break;
-                                                    case 4:
-                                                        aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
-                                                        break;
-                                                    default:
-                                                        aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
-                                                        break;
-                                                }
-                                                
-                                            }
-                                        }
-                                    }
-                                }
-
-                                //APIDictionnaryVariable? item = _listeVariables.FirstOrDefault(x => x.Variabletype == DictionnaryVariableClassType.EBOOL);
-                                //if (item != null)
-                                //    _client.UmasReadVariablesFromMemoryBlocks(0, (byte)item.BlockMemory, item.RelativeOffset, 1);
-
-                            }
                             break;
                         default:
                             MessageBox.Show("Envoie fonction non implémenté", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -260,9 +264,9 @@ namespace SampleUmasClient
             }
             finally
             {
-                aPIDictionnaryVariableBindingSource.DataSource=_listeVariables;
+                aPIDictionnaryVariableBindingSource.DataSource = _listeVariables;
                 aPIDictionnaryVariableBindingSource.ResetBindings(false);
-            }
+            }*/
         }
     }
 }

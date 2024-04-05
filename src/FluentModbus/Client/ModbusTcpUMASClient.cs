@@ -11,196 +11,40 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-/// <summary>
-/// Type of API to determine offset and communicate with the PLC
-/// </summary>
-public enum TypeAPI
-{
-    /// <summary>
-    /// M340 PLC
-    /// </summary>
-    M340 = 0,
-    /// <summary>
-    /// M340 PLC
-    /// </summary>
-    M580 = 1,
-    /// <summary>
-    /// Simulated PLC
-    /// </summary>
-    PLCSIM = 2,
-    /// <summary>
-    /// Unknown PLC
-    /// </summary>
-    UNKNOWN = 3
-
-}
-public enum APIState
-{
-    Stop = 0x01,
-    Run = 0x02,
-    Unknown = 0x03
-
-}
-
-/*[enum uint 8 UmasDataType(uint 8 dataTypeSize, uint 8 requestSize)
-    ['1' BOOL ['1','1']]
-    ['2' UNKNOWN2 ['1','1']]
-    ['3' UNKNOWN3 ['1','1']]
-    ['4' INT ['2', '2']]
-    ['5' UINT ['2','2']]
-    ['6' DINT ['4','3']]
-    ['7' UDINT ['4','3']]
-    ['8' REAL ['4','3']]
-    ['9' STRING ['1','17']]
-    ['10' TIME ['4','3']]
-    ['11' UNKNOWN11 ['1','1']]
-    ['12' UNKNOWN12 ['1','1']]
-    ['13' UNKNOWN13 ['1','1']]
-    ['14' DATE ['4','3']]
-    ['15' TOD ['4','3']]
-    ['16' DT ['4','3']]
-    ['17' UNKNOWN17 ['1','1']]
-    ['18' UNKNOWN18 ['1','1']]
-    ['19' UNKNOWN19 ['1','1']]
-    ['20' UNKNOWN20 ['1','1']]
-    ['21' BYTE ['1','1']]
-    ['22' WORD ['2','2']]
-    ['23' DWORD ['4','3']]
-    ['24' UNKNOWN24 ['1','1']]
-    ['25' EBOOL ['1','1']]
-]*/
-public enum DictionnaryVariableClassType
-{
-    BOOL = 0x01,
-    INT = 0x04,
-    UINT = 0x05,
-    DINT = 0x06,
-    UDINT = 0x07,
-    REAL = 0x08,
-    STRING = 0x09,
-    TIME = 0x0a,
-    DATE = 0x0e,
-    TOD = 0x0f,
-    DT = 0x10,
-    BYTE = 0x15,
-    WORD = 0x16,
-    DWORD = 0x17,
-    EBOOL = 0x19,
-    CTU = 0x1a
-}
-
-/// <summary>
-/// Description variable récupérée du dictionnaire de variable
-/// </summary>
-public class APIDictionnaryVariable
-{
-    String _name;
-    DictionnaryVariableClassType _variabletype;
-    Int16 _blockMemory;
-    byte _relativeOffset;
-    Int16 _baseoffset;
-    int _valeur;
-    /// <summary>
-    /// Constructeur de APIDictionnaryVariable
-    /// </summary>
-    /// <param name="name">Nom de la variable</param>
-    /// <param name="baseoffset">base offset associé à la variable</param>
-    /// <param name="blockMemory">Block memory associé à la variable</param>
-    /// <param name="relativeOffset">Offset relatif à la variable</param>
-    /// <param name="variabletype">Type de variable</param>
-    public APIDictionnaryVariable(string name, Int16 baseoffset, byte relativeOffset, Int16 blockMemory, DictionnaryVariableClassType variabletype)
-    {
-        _name = name;
-        _variabletype = variabletype;
-        _blockMemory = blockMemory;
-        _baseoffset = baseoffset;
-        _relativeOffset = relativeOffset;
-        _valeur = -1;
-    }
-    /// <summary>
-    /// Nom de la variable
-    /// </summary>
-    public string Name { get => _name; }
-
-    /// <summary>
-    /// Offset relatif à la variable
-    /// </summary>
-    public byte RelativeOffset { get => _relativeOffset; }
-    /// <summary>
-    /// Base offset assocé mémoire de la variable
-    /// </summary>
-    public Int16 Baseoffset { get => _baseoffset; }
-    /// <summary>
-    /// Bloc mémoire où lire la variable
-    /// </summary>
-    public Int16 BlockMemory { get => _blockMemory; }
-    /// <summary>
-    /// Valeur de la variable API
-    /// </summary>
-    public int Valeur { get => _valeur; set => _valeur = value; }
-    /// <summary>
-    /// Type de variable API
-    /// </summary>
-    public DictionnaryVariableClassType Variabletype { get => _variabletype; }
-
-    /// <summary>
-    /// Fontion qui retourne la taille de la variable suivant son type
-    /// </summary>
-    /// <returns></returns>
-    public int VariableLength
-    {
-        get
-        {
-            int ret = 0;
-            switch (Variabletype)
-            {
-                case DictionnaryVariableClassType.BOOL:
-                case DictionnaryVariableClassType.BYTE:
-                case DictionnaryVariableClassType.EBOOL:
-                case DictionnaryVariableClassType.CTU:
-                    ret = 1;
-                    break;
-                case DictionnaryVariableClassType.UINT:
-                case DictionnaryVariableClassType.INT:
-                case DictionnaryVariableClassType.WORD:
-                    ret = 2;
-                    break;
-                case DictionnaryVariableClassType.DINT:
-                case DictionnaryVariableClassType.UDINT:
-                case DictionnaryVariableClassType.REAL:
-                case DictionnaryVariableClassType.TIME:
-                case DictionnaryVariableClassType.DATE:
-                case DictionnaryVariableClassType.TOD:
-                case DictionnaryVariableClassType.DT:
-                case DictionnaryVariableClassType.DWORD:
-                    ret = 3;
-                    break;
-                case DictionnaryVariableClassType.STRING:
-                    ret = 17;
-                    break;
-                default:
-                    ret = 0;
-                    break;
-            }
-
-            return ret;
-
-
-        }
-    }
-}
-
-    public enum TypeInfoAPI
-    {
-        Coils = 2,
-        HoldingRegisters = 3
-    }
+using FluentModbusUmas.Umas;
 
 
 
 namespace FluentModbusUmas
-{
-
+{    /// <summary>
+     /// Arguments for the event raised when the list of API variables is updated (variables added,changed or removed)
+     /// </summary>
+    public class ModbusUmasAPILogEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Log a envoyer
+        /// </summary>
+       public  String Log { get; set; }
+        
+    }
+    /// <summary>
+    /// Arguments for the event raised when the list of API variables is updated (variables added,changed or removed)
+    /// </summary>
+    public class ModbusAPIListVariableUpdatedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Complete List of variables read from PLC
+        /// </summary>
+        public List<APIDictionnaryVariable>? ListVariable { get; set; }
+        /// <summary>
+        /// List of variables added or changed
+        /// </summary>
+        public List<APIDictionnaryVariable>? ListVariableAddedOrChanged { get; set; }
+        /// <summary>
+        /// List of variables removed
+        /// </summary>
+        public List<APIDictionnaryVariable>? ListVariableRemoved { get; set; }
+    }
     /// <summary>
     /// Modbus UMAS Event arguments triggered when data is sent to the PLC
     /// </summary>
@@ -216,7 +60,7 @@ namespace FluentModbusUmas
         public byte[]? Data { get; set; }
     }
     /// <summary>
-    /// Modbus UMAS Event arguments triggered when data is received to the PLC
+    /// Modbus UMAS Event arguments triggered when data is received from the PLC
     /// </summary>
     public class ModbusUmasDataReceivedEventArgs : EventArgs
     {
@@ -230,14 +74,28 @@ namespace FluentModbusUmas
     /// </summary>
     public class ModbusUMASTcpClient : ModbusTcpClient
     {
-        String _fwversion;
+        bool _updateListVariableAuto = true;
+        int _updateListVariableAutoInterval = 5;
+        int _updateListVariableAutoCounter = 0;
+        String _fwversion = "";
         String _plcName = "";
         TypeAPI _typeAPI;
         APIState _aPIState = APIState.Unknown;
+        List<APIDictionnaryVariable> _listeVariables;
+        int _unitIdentifier;
+        /// <summary>
+        /// Firmware version of the PLC
+        /// </summary>
         public String PLCFWVersion { get { return _fwversion; } }
+        /// <summary>
+        /// Name of the PLC
+        /// </summary>
         public String PLCName { get { return _plcName; } }
+        /// <summary>
+        /// PLC State
+        /// </summary>
         public String PLCState { get { return _aPIState.ToString(); } }
-        byte[]? _cRCFromPLC;
+        private byte[]? _cRCFromPLC;
         byte[]? _cRCShifted;
         /// <summary>
         /// Event triggered when data is sent to the PLC
@@ -247,35 +105,263 @@ namespace FluentModbusUmas
         /// Event triggered when data is received from the PLC
         /// </summary>
         public event EventHandler<ModbusUmasDataReceivedEventArgs>? UmasDataReceived;
+        /// <summary>
+        /// Event triggered when CRC, CRC shifted, API Firmware version or API name is changed
+        /// </summary>
+        public event EventHandler<EventArgs>? APIInfoChanged;
+        /// <summary>
+        /// Event triggered when the list of API variables is updated (variables added,changed or removed)
+        /// </summary>
+        public event EventHandler<ModbusAPIListVariableUpdatedEventArgs>? APIListVariableUpdated;
+        /// <summary>
+        /// Event triggered when the list of API variables is updated (variables added,changed or removed)
+        /// </summary>
+        public event EventHandler<ModbusUmasAPILogEventArgs>? APILog;
         Timer _timerUmasSendCdG;
         bool _umasRequestStarted = false;
         byte _pairing_key = 0x00;
 
         /// <summary>
-        /// Retourne le
+        /// Retourne le CRC de l'application API
         /// </summary>
         public byte[]? CRCFromPLC { get { if (_cRCFromPLC == null) return null; else return _cRCFromPLC; } }
+        /// <summary>
+        /// Retourne le CRC de l'application API décalé de 1 octet vers la gauche
+        /// </summary>
         public byte[]? CRCShiftedFromPLC { get { if (_cRCShifted == null) return null; else return _cRCShifted; } }
         /// <summary>
         /// Creates a new Modbus TCP UMAS client for communication with a schneider PLC.
         /// </summary>
-        public ModbusUMASTcpClient() : base()
+        public ModbusUMASTcpClient(int uintidentifier) : base()
         {
+            _listeVariables = new List<APIDictionnaryVariable>();
             _timerUmasSendCdG = new Timer(_UmasTimerSendWdGRequest);
         }
+        /// <summary>
+        /// Get PLC infos from the PLC with UMAS 0x02 et 0x04 requests
+        /// </summary>
+        /// <returns></returns>
+        private bool GetPLCInfos()
+        {
+            (bool ret, String plcname, String fwversion) = SendUmasREAD_PLC_ID();
+            if (ret)
+            {
+                (bool test, byte[]? crc, byte[]? crcshidted) = SendUmas_READ_PLC_INFO();
+                if (test && crc != null && crcshidted != null)
+                {
+                    if (_fwversion != fwversion || _plcName != plcname || _cRCFromPLC != crc || _cRCShifted != crcshidted)
+                        APIInfoChanged?.Invoke(this, new EventArgs());
+
+                    _fwversion = fwversion;
+                    _plcName = plcname;
+                    _cRCFromPLC = crc;
+                    _cRCShifted = crcshidted;
+                    return true;
+                }
+
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Get variables and values from the data dictionnary of the PLC
+        /// </summary>
+        /// <param name="pMajListeVariable"></param>
+        /// <returns></returns>
+        public (bool, List<APIDictionnaryVariable>) MajListVariablesFromDataDictionnary(bool pMajListeVariable)
+        {
+            List<APIDictionnaryVariable> listeVariables = new List<APIDictionnaryVariable>();
+            bool ret = false;
+            if (pMajListeVariable)
+            {
+                (listeVariables, ret) = SendUmas_GetDictionnaryVariables();
+
+                if (ret)
+                {
+                    ret = FillListVariableValues(listeVariables);
+                }
+            }
+            if (ret)
+            {
+                List<APIDictionnaryVariable> listeVariablesDeleted = new List<APIDictionnaryVariable>();
+                List<APIDictionnaryVariable> listeVariablesAddedOrModified = new List<APIDictionnaryVariable>();
+                foreach (var item in _listeVariables)
+                {
+                    //Si la variable est dans la liste des variables existantes, on la met à jour
+                    APIDictionnaryVariable? itemfromapi = listeVariables.FirstOrDefault(x => x.Name == item.Name);
+                    if (itemfromapi != null)
+                    {
+                        if (itemfromapi.Valeur != item.Valeur)
+                        {
+                            item.Valeur = itemfromapi.Valeur;
+                            listeVariablesAddedOrModified.Add(item);
+                        }
+                        //Si on a modifié le type de variable, le baseoffset, le blockmemory ou le relativeoffset, c'est comme si on avait supprimé la variable
+                        else if (itemfromapi.Variabletype != item.Variabletype || itemfromapi.Baseoffset != item.Baseoffset ||
+                            itemfromapi.BlockMemory != item.BlockMemory || itemfromapi.RelativeOffset != item.RelativeOffset)
+                        {
+                            listeVariablesDeleted.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        listeVariablesDeleted.Add(item);
+                    }
+                }
+
+                //On ajoute les variables qui n'existent pas dans la liste des variables existantes
+                foreach (var item in listeVariables)
+                {
+                    if (!_listeVariables.Exists(x => x.Name == item.Name))
+                    {
+                        _listeVariables.Add(item);
+                        listeVariablesAddedOrModified.Add(item);
+                    }
+                }
+                //On supprime les variables qui n'existent plus
+                foreach (var item in listeVariablesDeleted)
+                {
+                    _listeVariables.Remove(item);
+                }
+                //On déclenche l'évènement de mise à jour de la liste des variables
+                APIListVariableUpdated?.Invoke(this, new ModbusAPIListVariableUpdatedEventArgs() {ListVariable=listeVariables, ListVariableAddedOrChanged = listeVariablesAddedOrModified, ListVariableRemoved = listeVariablesDeleted });
+            }
+            return (ret, listeVariables);
+        }
+
+        private bool FillListVariableValues(List<APIDictionnaryVariable> plisteVariables)
+        {
+            try
+            {
+                if (plisteVariables != null)
+                {
+                    List<APIDictionnaryVariable> _sortedlist = plisteVariables;
+                    if (_sortedlist != null)
+                    {
+                        _sortedlist.OrderBy(x => x.BlockMemory).ThenBy(x => x.RelativeOffset).ToList();
+
+                        int memoryblock = -1;
+                        int minoffset = -1;
+                        int maxoffset = -1;
+                        int length = -1;
+                        foreach (var aPIDictionnaryVariable in _sortedlist)
+                        {
+                            //Si memoryblock = -1 alors c'est le premier
+                            if (memoryblock == -1)
+                            {
+                                memoryblock = aPIDictionnaryVariable.BlockMemory;
+                                minoffset = aPIDictionnaryVariable.RelativeOffset;
+                                maxoffset = aPIDictionnaryVariable.RelativeOffset;
+                                continue;
+                            }
+                            //Si le memoryblock est le même que le précédent on met à jour les offset min et max
+                            if (memoryblock == aPIDictionnaryVariable.BlockMemory)
+                            {
+                                if (aPIDictionnaryVariable.RelativeOffset < minoffset)
+                                    minoffset = aPIDictionnaryVariable.RelativeOffset;
+                                if (aPIDictionnaryVariable.RelativeOffset > maxoffset)
+                                    maxoffset = aPIDictionnaryVariable.RelativeOffset;
+                                length = aPIDictionnaryVariable.VariableLength;
+                                continue;
+                            }
+                            else
+                            {
+                                //sinon : on change de memoryblock => on envoie la requête pour récupérer les valeurs
+                                (byte[] ret, bool ret2) = UmasReadVariablesFromMemoryBlocks((byte)memoryblock, minoffset, maxoffset - minoffset + length);
+
+                                if (ret2 && ret != null && ret.Length > 0)
+                                {
+
+                                    List<APIDictionnaryVariable> _sortedblock = _sortedlist.Where(plisteVariables => plisteVariables.BlockMemory == memoryblock).ToList();
+                                    foreach (var aPIDictionnaryVariablebis in _sortedblock)
+                                    {
+                                        byte[] tab = new byte[aPIDictionnaryVariablebis.VariableLength];
+                                        Array.Copy(ret, aPIDictionnaryVariablebis.RelativeOffset - minoffset, tab, 0, aPIDictionnaryVariablebis.VariableLength);
+                                        switch (tab.Length)
+                                        {
+                                            case 1:
+                                                aPIDictionnaryVariablebis.Valeur = tab[0];
+                                                break;
+                                            case 2:
+                                                aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt16(tab);
+                                                break;
+                                            case 4:
+                                                aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
+                                                break;
+                                            default:
+                                                aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
+                                                break;
+                                        }
+                                    }
+                                }
+                                memoryblock = aPIDictionnaryVariable.BlockMemory;
+                                minoffset = aPIDictionnaryVariable.RelativeOffset;
+                                maxoffset = aPIDictionnaryVariable.RelativeOffset;
+                                length = aPIDictionnaryVariable.VariableLength;
+                            }
+
+                        }
+                        if (memoryblock != -1)
+                        {
+                            (byte[] ret, bool ret2) = UmasReadVariablesFromMemoryBlocks((byte)memoryblock, minoffset, maxoffset - minoffset + length);
+                            if (ret2 && ret != null && ret.Length > 0)
+                            {
+
+                                List<APIDictionnaryVariable> _sortedblock = _sortedlist.Where(plisteVariables => plisteVariables.BlockMemory == memoryblock).ToList();
+                                foreach (var aPIDictionnaryVariablebis in _sortedblock)
+                                {
+                                    byte[] tab = new byte[aPIDictionnaryVariablebis.VariableLength];
+                                    Array.Copy(ret.ToArray(), aPIDictionnaryVariablebis.RelativeOffset - minoffset, tab, 0, aPIDictionnaryVariablebis.VariableLength);
+                                    switch (tab.Length)
+                                    {
+                                        case 1:
+                                            aPIDictionnaryVariablebis.Valeur = tab[0];
+                                            break;
+                                        case 2:
+                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt16(tab);
+                                            break;
+                                        case 4:
+                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
+                                            break;
+                                        default:
+                                            aPIDictionnaryVariablebis.Valeur = BitConverter.ToInt32(tab);
+                                            break;
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
+
+            return true;
+
+
+
+
+        }
+
+
 
         /// <summary>
         /// Function to send an UmasRequestTo PLC and get the reponse back
         /// </summary>
-        /// <param name="unitIdentifier"></param>
         /// <param name="p_pairing_key"></param>
         /// <param name="pCode"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Span<byte> SendUmasRequest(int unitIdentifier, byte p_pairing_key, ModbusUmasFunctionCode pCode, byte[]? data)
+        private Span<byte> SendUmasRequest(byte p_pairing_key, ModbusUmasFunctionCode pCode, byte[]? data)
         {
 
-            var unitIdentifier_converted = ConvertUnitIdentifier(unitIdentifier);
+            var unitIdentifier_converted = ConvertUnitIdentifier(_unitIdentifier);
 
             var buffer = TransceiveFrame(unitIdentifier_converted, ModbusFunctionCode.UmasCode, writer =>
             {
@@ -292,7 +378,7 @@ namespace FluentModbusUmas
 
 
         }
-        public bool SetVariablesValueFromREAD_SYSTEMBTISWORD_REQUEST(int unitIdentifier, List<APIDictionnaryVariable> listevar)
+        private bool SetVariablesValueFromREAD_SYSTEMBTISWORD_REQUEST(List<APIDictionnaryVariable> listevar)
         {
 
             //format de la requete:
@@ -387,8 +473,19 @@ namespace FluentModbusUmas
             }
             int numberoftype = listetype.Count;
             //int numberoftype = listevar.Select(x => x.Variabletype).Distinct().Count();
-            if (_cRCShifted == null && !SendUmas_READ_PLC_INFO(unitIdentifier))
-                return false;
+            if (_cRCShifted == null)
+            {
+                (bool ret, byte[]? crc, byte[]? crc_shifted) = SendUmas_READ_PLC_INFO();
+                if (!ret || crc == null || crc_shifted == null)
+                    return false;
+                else
+                {
+                    _cRCFromPLC = crc;
+                    _cRCShifted = crc_shifted;
+                    APIInfoChanged?.Invoke(this, new EventArgs());
+                }
+            }
+
 
             int tailletotal = _cRCShifted.Length + 1 + datavar.Count * datavar[0].Length;
 
@@ -402,7 +499,7 @@ namespace FluentModbusUmas
                 position += data.Length;
             }
 
-            SendUmasRequest(unitIdentifier, _pairing_key, ModbusUmasFunctionCode.UMAS_READ_VARIABLES, datafinal);
+            SendUmasRequest(_pairing_key, ModbusUmasFunctionCode.UMAS_READ_VARIABLES, datafinal);
 
 
             return true;
@@ -410,13 +507,12 @@ namespace FluentModbusUmas
         /// <summary>
         /// Send a READ_PLC_ID request to the PLC in order to get the PLC name and firmware version
         /// </summary>
-        /// <param name="unitIdentifier"></param>
-        /// <param name="pairingkey"></param>
-        /// <returns></returns>
-        public bool SendUmasREAD_PLC_ID(int unitIdentifier, byte pairingkey)
+        /// <returns>bool ok or not, String PLC Name, String FW Version</returns>
+        private (bool, String, String) SendUmasREAD_PLC_ID()
         {
-
-            Span<byte> retrequest = SendUmasRequest(unitIdentifier, pairingkey, ModbusUmasFunctionCode.UMAS_READ_ID, null);
+            String plcName = "";
+            String fwVersion = "";
+            Span<byte> retrequest = SendUmasRequest(_pairing_key, ModbusUmasFunctionCode.UMAS_READ_ID, null);
             if (retrequest.Length >= 3)
             {
                 byte[] bytes = retrequest.ToArray();
@@ -434,24 +530,23 @@ namespace FluentModbusUmas
                     //on récupère les infos sur le firmware
                     _fwversion = bytes[12].ToString("X2") + "." + bytes[11].ToString("X2");
 
-                    return SendUmas_READ_PLC_INFO(unitIdentifier);
+                    return (true, plcName, fwVersion);
                 }
             }
-            return false;
+            return (false, plcName, fwVersion);
         }
 
         /// <summary>
         /// Function to write the inputs of a PLC to the memory blocks (code UMAS 0x21)
         /// </summary>
         /// <param name="memoryblock"></param>
-        /// <param name="unitIdentifier"></param>
         /// <param name="startoffset"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public bool UmasWriteInputWithMemoryBlocks(int unitIdentifier, int memoryblock, int startoffset, byte[] data)
+        private bool UmasWriteInputWithMemoryBlocks(int memoryblock, int startoffset, byte[] data)
         {
 
-            Span<byte> retrequest = Umas_Write_Memoryblock(unitIdentifier, memoryblock, startoffset, data.Length, data);
+            Span<byte> retrequest = Umas_Write_Memoryblock(memoryblock, startoffset, data.Length, data);
 
             if (retrequest.Length >= 3)
             {
@@ -464,7 +559,7 @@ namespace FluentModbusUmas
             return false;
         }
 
-        private Span<byte> Umas_Write_Memoryblock(int unitIdentifier, int pnumeroblock, int startoffset, int nbBytestoWrite, byte[] pdata)
+        private Span<byte> Umas_Write_Memoryblock(int pnumeroblock, int startoffset, int nbBytestoWrite, byte[] pdata)
         {
             byte[] data = new byte[9 + pdata.Length];
             data[0] = 0x01;
@@ -472,7 +567,7 @@ namespace FluentModbusUmas
             BitConverter.GetBytes((short)startoffset).CopyTo(data, 3); // Start OFFSET
             BitConverter.GetBytes((short)nbBytestoWrite).CopyTo(data, 7); // Nombre de bytes à écrire
             Array.Copy(pdata, 0, data, 9, pdata.Length); // data a ecrire
-            Span<byte> buffer = SendUmasRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_WRITE_MEMORY_BLOCK, data);
+            Span<byte> buffer = SendUmasRequest(0, ModbusUmasFunctionCode.UMAS_WRITE_MEMORY_BLOCK, data);
 
             return buffer;
         }
@@ -480,15 +575,26 @@ namespace FluentModbusUmas
         /// Function that send an Enable/Disable Dictionnary UMAS Request in order to get API Dictionnary Variables (0x26)
         /// And get liste API variables from dictionnary
         /// </summary>
-        /// <param name="unitIdentifier"></param>
-        /// <param name="pApi"></param>
         /// <returns>retourne une liste de variables API du dictionnaire</returns>
-        public List<APIDictionnaryVariable> SendUmas_GetDictionnaryVariables(int unitIdentifier, TypeAPI pApi)
+        private (List<APIDictionnaryVariable>, bool) SendUmas_GetDictionnaryVariables()
         {
             List<APIDictionnaryVariable> listeret = new List<APIDictionnaryVariable>();
+            bool retbool = false;
             //Si on a pas le code CRC de l'API, on va le chercher
-            if (_cRCFromPLC == null)
-                SendUmas_READ_PLC_INFO(unitIdentifier);
+
+            if (_cRCShifted == null)
+            {
+                (bool ret, byte[]? crc, byte[]? crc_shifted) = SendUmas_READ_PLC_INFO();
+                if (!ret || crc == null || crc_shifted == null)
+                    return (listeret, false);
+                else
+                {
+                    _cRCFromPLC = crc;
+                    _cRCShifted = crc_shifted;
+
+                    APIInfoChanged?.Invoke(this, new EventArgs());
+                }
+            }
 
 
 
@@ -504,7 +610,7 @@ namespace FluentModbusUmas
             data[10] = 0x00;
             data[11] = 0x00;
             data[12] = 0x00;
-            Span<byte> retrequest = SendUmasRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_ENABLEDISABLE_DATADICTIONNARY, data);
+            Span<byte> retrequest = SendUmasRequest(0, ModbusUmasFunctionCode.UMAS_ENABLEDISABLE_DATADICTIONNARY, data);
 
             if (retrequest.Length >= 9)
             {
@@ -520,11 +626,13 @@ namespace FluentModbusUmas
                         Array.Copy(rebytes, 10, rebytes, 0, rebytes.Length - 10);
                         Array.Resize(ref rebytes, rebytes.Length - 10);
                     }
+                    else
+                        return (listeret, retbool);
 
                     int position = 0;
                     for (int i = 0; i < nbelement; i++)
                     {
-                        if (position + 8 < rebytes.Length)
+                        if (position + 10 < rebytes.Length)
                         {
                             bool test = BitConverter.IsLittleEndian;
                             DictionnaryVariableClassType variabletype = (DictionnaryVariableClassType)rebytes[position];
@@ -551,48 +659,63 @@ namespace FluentModbusUmas
 
                     }
                 }
+                else
+                    return (listeret, retbool);
             }
+            else
+                return (listeret, retbool);
 
 
-
-            return listeret;
+            retbool = true;
+            return (listeret, retbool);
         }
         /// <summary>
         /// Function to read the a variable (ebool, adressed words of a PLC from the memory blocks value (code UMAS 0x20) 
         /// => can get block number and offset from Datadictionnary request if enabled (0x26), if not: maybe from 0x01 or 0x03 but cannot get it firgured out at this time...
         /// </summary>
-        /// <param name="unitIdentifier"></param>
         /// <param name="memoryblock"></param>
         /// <param name="startoffset"></param>
         /// <param name="nbBytestoRead"></param>
         /// <returns>bytes read in plc or empty</returns>
-        public Span<byte> UmasReadVariablesFromMemoryBlocks(/*TypeAPI api,*/ int unitIdentifier, byte memoryblock, int startoffset, int nbBytestoRead)
+        private (byte[], bool) UmasReadVariablesFromMemoryBlocks(byte memoryblock, int startoffset, int nbBytestoRead)
         {
             Span<byte> ret = new Span<byte>();
-
-            Span<byte> retrequest = Umas_Read_Memoryblock(unitIdentifier, memoryblock, startoffset, nbBytestoRead);
-
-            if (retrequest.Length >= 6)
+            bool ret2 = false;
+            try
             {
-                byte[] bytes = retrequest.ToArray();
-                if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
+
+                Span<byte> retrequest = Umas_Read_Memoryblock(memoryblock, startoffset, nbBytestoRead);
+
+                if (retrequest.Length >= 6)
                 {
-                    int size = BitConverter.ToInt16(bytes, 4);
-                    if (bytes.Length >= 6 + size)
-                        ret = new Span<byte>(bytes, 6, size);
+                    byte[] bytes = retrequest.ToArray();
+                    if (bytes[0] == (byte)ModbusFunctionCode.UmasCode && bytes[2] == (byte)ModbusUmasFunctionCode.UMAS_RET_OK_FROM_API)
+                    {
+                        int size = BitConverter.ToInt16(bytes, 4);
+                        if (bytes.Length >= 6 + size)
+                            ret = new Span<byte>(bytes, 6, size);
+                    }
+                    else
+                        return (ret.ToArray(), ret2 = false);
                 }
+                else
+                    return (ret.ToArray(), ret2 = false);
             }
-            return ret;
+            catch (Exception)
+            {
+
+                return (ret.ToArray(), ret2 = false);
+            }
+            return (ret.ToArray(), ret2 = true);
         }
         /// <summary>
         /// Generate a UMAS request to read a memory block from the PLC
         /// </summary>
-        /// <param name="unitIdentifier"></param>
         /// <param name="pnumeroblock"></param>
         /// <param name="startoffset"></param>
         /// <param name="nbBytestoRead"></param>
         /// <returns></returns>
-        private Span<byte> Umas_Read_Memoryblock(int unitIdentifier, int pnumeroblock, int startoffset, int nbBytestoRead)
+        private Span<byte> Umas_Read_Memoryblock(int pnumeroblock, int startoffset, int nbBytestoRead)
         {
             byte[] data = new byte[9];
             data[0] = 0x01;
@@ -600,13 +723,13 @@ namespace FluentModbusUmas
             BitConverter.GetBytes((short)startoffset).CopyTo(data, 3); // Start OFFSET
             BitConverter.GetBytes((short)nbBytestoRead).CopyTo(data, 7); // Nombre de bytes à lire
 
-            Span<byte> buffer = SendUmasRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_READ_MEMORY_BLOCK, data);
+            Span<byte> buffer = SendUmasRequest(0, ModbusUmasFunctionCode.UMAS_READ_MEMORY_BLOCK, data);
 
             return buffer;
         }
 
 
-        private Span<byte> UmasReadSystemCoilsAndRegisters(int unitIdentifier, TypeInfoAPI pdatatype, int startoffset, int nbBytestoRead)
+        private Span<byte> UmasReadSystemCoilsAndRegisters(TypeInfoAPI pdatatype, int startoffset, int nbBytestoRead)
         {
             byte[] data = new byte[11];
             data[0] = 0x01;
@@ -615,21 +738,20 @@ namespace FluentModbusUmas
             BitConverter.GetBytes((Int32)startoffset).CopyTo(data, 4); // Start OFFSET
             BitConverter.GetBytes((short)nbBytestoRead).CopyTo(data, 8); // Nombre de bytes à lire
 
-            Span<byte> buffer = SendUmasRequest(unitIdentifier, 0, ModbusUmasFunctionCode.UMAS_READ_COILS_REGISTERS, data);
+            Span<byte> buffer = SendUmasRequest(0, ModbusUmasFunctionCode.UMAS_READ_COILS_REGISTERS, data);
 
             return buffer;
         }
         /// <summary>
         /// //Initiate an UMAS connection with the PLC (0x01) => to use before PLC reservation
         /// </summary>
-        /// <param name="unitIdentifier">Adresse modbus du plc</param>
         /// <returns></returns>
-        private bool InitUmasRequest(int unitIdentifier)
+        private bool SendUmas_InitCOMMRequest()
         {
             if (_umasRequestStarted)
                 return false;
 
-            SendUmasRequest(0, _pairing_key, ModbusUmasFunctionCode.UMAS_INIT_COMM, new byte[] { 0x00 });
+            SendUmasRequest(_pairing_key, ModbusUmasFunctionCode.UMAS_INIT_COMM, new byte[] { 0x00 });
             _umasRequestStarted = true;
             return true;
         }
@@ -637,9 +759,9 @@ namespace FluentModbusUmas
         /// Send a 0X04 (READ_PLC_INFO) in order to get info from PLC and CRC byte[]
         /// </summary>
         /// <returns></returns>
-        public bool SendUmas_READ_PLC_INFO(int unitIdentifier)
+        private (bool, byte[]?, byte[]?) SendUmas_READ_PLC_INFO()
         {
-            Span<byte> retrequest = SendUmasRequest(unitIdentifier, _pairing_key, ModbusUmasFunctionCode.UMAS_READ_PLC_INFO, null);
+            Span<byte> retrequest = SendUmasRequest(_pairing_key, ModbusUmasFunctionCode.UMAS_READ_PLC_INFO, null);
 
 
             if (retrequest.Length >= 64)
@@ -656,24 +778,22 @@ namespace FluentModbusUmas
 
                         _aPIState = APIState.Unknown;
                     }
-                    _cRCFromPLC = new byte[4];
-                    _cRCShifted = new byte[4];
+                    byte[] cRCFromPLC = new byte[4];
+                    byte[] cRCShifted = new byte[4];
                     //On récuprère le CRC qui est normalement à la 11ème position
-                    Array.Copy(bytes, 11, _cRCFromPLC, 0, 4);
+                    Array.Copy(bytes, 11, cRCFromPLC, 0, 4);
                     //On le convertie en Int32 (LittleEndian)
-                    Int32 crcbase = BitConverter.ToInt32(_cRCFromPLC, 0);
+                    Int32 crcbase = BitConverter.ToInt32(cRCFromPLC, 0);
                     //On shift le résultat obtenu de 1 bit vers la gauche
                     Int32 crcshifted = crcbase << 1;
                     //On reconvertie en tableau de byte LittleEndian
-                    _cRCShifted = BitConverter.GetBytes(crcshifted);
-                    return true;
+                    cRCShifted = BitConverter.GetBytes(crcshifted);
+                    return (true, cRCFromPLC, cRCShifted);
                 }
             }
 
-            _cRCFromPLC = null;
-            _cRCShifted = null;
 
-            return false;
+            return (false, null, null);
 
         }
 
@@ -691,14 +811,50 @@ namespace FluentModbusUmas
 
         private void StopUmasRequests()
         {
+            _aPIState = APIState.Unknown;
+            _cRCFromPLC= null;
+            _cRCShifted = null;
+            _fwversion = "";
+            _plcName = "";
+
             _umasRequestStarted = false;
+            _timerUmasSendCdG.Change(Timeout.Infinite, Timeout.Infinite);
 
         }
 
         private void _UmasTimerSendWdGRequest(object? state)
         {
             if (!IsConnected)
+            {
+                StopUmasRequests();
                 return;
+            }
+            _timerUmasSendCdG.Change(Timeout.Infinite, Timeout.Infinite);
+            bool update = false;
+            if (_updateListVariableAuto)
+            {
+                _updateListVariableAutoCounter++;
+                if (_updateListVariableAutoCounter >= _updateListVariableAutoInterval)
+                {
+                    _updateListVariableAutoCounter = 0;
+                    update = true;
+                }
+            }
+            try
+            {
+
+                if (GetPLCInfos())
+                    MajListVariablesFromDataDictionnary(update);
+            }
+            catch (Exception ex)
+            {
+
+                APILog?.Invoke(this, new ModbusUmasAPILogEventArgs() { Log = ex.Message });
+            }
+            finally
+            {
+                _timerUmasSendCdG.Change(1000, 1000);
+            }
         }
 
 
@@ -717,6 +873,7 @@ namespace FluentModbusUmas
         public new void Connect(ModbusEndianness endianness)
         {
             base.Connect(endianness);
+            _timerUmasSendCdG.Change(0, 1000);
         }
 
         /// <summary>
@@ -726,6 +883,7 @@ namespace FluentModbusUmas
         public new void Connect(string remoteEndpoint)
         {
             base.Connect(remoteEndpoint);
+            _timerUmasSendCdG.Change(0, 1000);
         }
 
         /// <summary>
@@ -736,6 +894,7 @@ namespace FluentModbusUmas
         public new void Connect(string remoteEndpoint, ModbusEndianness endianness)
         {
             base.Connect(remoteEndpoint, endianness);
+            _timerUmasSendCdG.Change(0, 1000);
         }
 
         /// <summary>
@@ -744,7 +903,17 @@ namespace FluentModbusUmas
         /// <param name="remoteIpAddress">The IP address of the end unit with <see cref="ModbusEndianness.LittleEndian"/> as default byte layout. Example: IPAddress.Parse("192.168.0.1").</param>
         public new void Connect(IPAddress remoteIpAddress)
         {
-            base.Connect(remoteIpAddress);
+            try
+            {
+
+                base.Connect(remoteIpAddress);
+                _timerUmasSendCdG.Change(0, 1000);
+            }
+            catch (Exception ex)
+            {
+
+                APILog?.Invoke(this, new ModbusUmasAPILogEventArgs() { Log = ex.Message });
+            }
         }
 
         /// <summary>
@@ -755,6 +924,7 @@ namespace FluentModbusUmas
         public new void Connect(IPAddress remoteIpAddress, ModbusEndianness endianness)
         {
             base.Connect(remoteIpAddress, endianness);
+            _timerUmasSendCdG.Change(0, 1000);
         }
 
         /// <summary>
@@ -764,6 +934,7 @@ namespace FluentModbusUmas
         public new void Connect(IPEndPoint remoteEndpoint)
         {
             base.Connect(remoteEndpoint);
+            _timerUmasSendCdG.Change(0, 1000);
         }
 
         /// <summary>
@@ -774,13 +945,14 @@ namespace FluentModbusUmas
         public new void Connect(IPEndPoint remoteEndpoint, ModbusEndianness endianness)
         {
             base.Connect(remoteEndpoint, endianness);
+            _timerUmasSendCdG.Change(0, 1000);
         }
         /// <summary>
         ///   Disconnect from the end unit.
         /// </summary>
         public new void Disconnect()
         {
-            _timerUmasSendCdG.Change(Timeout.Infinite, Timeout.Infinite);
+
             StopUmasRequests();
             base.Disconnect();
 
@@ -794,6 +966,8 @@ namespace FluentModbusUmas
         /// </summary>
         public new void Dispose()
         {
+            if (IsConnected)
+                Disconnect();
             StopUmasRequests();
             _timerUmasSendCdG.Dispose();
             base.Dispose();
