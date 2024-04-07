@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FluentModbusUmas.Assets
+namespace TrapilModbusUmas.Assets
 {
     /// <summary>
     /// Specifies the UMAS action that client can send to control PLC

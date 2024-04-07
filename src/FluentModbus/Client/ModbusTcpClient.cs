@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using FluentModbusUmas.Assets;
+using TrapilModbusUmas.Assets;
 
-namespace FluentModbusUmas
+namespace TrapilModbusUmas
 {
     /// <summary>
     /// A Modbus TCP client.

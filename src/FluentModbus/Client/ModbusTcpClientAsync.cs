@@ -4,17 +4,17 @@
 
 
 
-/* This is automatically translated code. */
-
+ /* This is automatically translated code. */
+ 
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentModbusUmas.Assets;
+using TrapilModbusUmas.Assets;
 
-namespace FluentModbusUmas
+namespace TrapilModbusUmas
 {
-    public partial class ModbusTcpClient
+	public partial class ModbusTcpClient
 	{
 		///<inheritdoc/>
         protected override async Task<Memory<byte>> TransceiveFrameAsync(byte unitIdentifier, ModbusFunctionCode functionCode, Action<ExtendedBinaryWriter> extendFrame, CancellationToken cancellationToken = default)

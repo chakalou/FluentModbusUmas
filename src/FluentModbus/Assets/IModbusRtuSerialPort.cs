@@ -1,4 +1,4 @@
-﻿namespace FluentModbusUmas.Assets
+﻿namespace TrapilModbusUmas.Assets
 {
     /// <summary>
     /// A serial port for Modbus RTU communication.

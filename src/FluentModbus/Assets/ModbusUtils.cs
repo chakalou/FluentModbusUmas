@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 #endif
 
-namespace FluentModbusUmas.Assets
+namespace TrapilModbusUmas.Assets
 {
     internal static class ModbusUtils
     {

@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
-using FluentModbusUmas.Assets;
+using TrapilModbusUmas.Assets;
 
-namespace FluentModbusUmas
+namespace TrapilModbusUmas
 {
     /// <summary>
     /// A base class for Modbus client implementations.

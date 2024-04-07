@@ -1,4 +1,4 @@
-﻿namespace FluentModbusUmas.Assets
+﻿namespace TrapilModbusUmas.Assets
 {
     /// <summary>
     /// Specifies the action the Modbus server is requested to do.

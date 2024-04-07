@@ -1,4 +1,4 @@
-﻿using FluentModbusUmas.Umas;
+﻿using TrapilModbusUmas.Umas;
 
 namespace SampleUmasClient
 {

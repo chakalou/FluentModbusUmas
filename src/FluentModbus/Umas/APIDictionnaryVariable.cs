@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FluentModbusUmas.Umas
+namespace TrapilModbusUmas.Umas
 {
     /// <summary>
     /// Description variable récupérée du dictionnaire de variable

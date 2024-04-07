@@ -81,7 +81,7 @@
     <EmbeddedResource Update="Resources\ErrorMessage.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ErrorMessage.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>FluentModbusUmas</CustomToolNamespace>
+      <CustomToolNamespace>TrapilModbusUmas</CustomToolNamespace>
     </EmbeddedResource>
   </ItemGroup>
 

@@ -1,7 +1,7 @@
 ﻿using System.Buffers;
 using System.Runtime.InteropServices;
 
-namespace FluentModbusUmas.Assets
+namespace TrapilModbusUmas.Assets
 {
     internal class CastMemoryManager<TFrom, TTo> : MemoryManager<TTo>
             where TFrom : struct

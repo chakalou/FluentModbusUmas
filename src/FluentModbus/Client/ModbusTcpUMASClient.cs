@@ -11,12 +11,12 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using FluentModbusUmas.Assets;
-using FluentModbusUmas.Umas;
+using TrapilModbusUmas.Assets;
+using TrapilModbusUmas.Umas;
 
 
 
-namespace FluentModbusUmas
+namespace TrapilModbusUmas
 {    /// <summary>
      /// Arguments for the event raised when the list of API variables is updated (variables added,changed or removed)
      /// </summary>

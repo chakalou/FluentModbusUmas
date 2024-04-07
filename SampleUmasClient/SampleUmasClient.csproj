@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\FluentModbus\FluentModbusUmas.csproj" />
+    <ProjectReference Include="..\src\FluentModbus\TrapilModbusUmas.csproj" />
   </ItemGroup>
 
 </Project>

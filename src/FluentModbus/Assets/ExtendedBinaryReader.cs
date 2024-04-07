@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace FluentModbusUmas.Assets
+namespace TrapilModbusUmas.Assets
 {
     /// <summary>
     /// A binary reader with extended capability to handle big-endian data.

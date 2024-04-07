@@ -1,6 +1,6 @@
-using FluentModbusUmas;
-using FluentModbusUmas.Assets;
-using FluentModbusUmas.Umas;
+using TrapilModbusUmas;
+using TrapilModbusUmas.Assets;
+using TrapilModbusUmas.Umas;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;

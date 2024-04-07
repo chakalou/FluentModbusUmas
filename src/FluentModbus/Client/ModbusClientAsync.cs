@@ -4,7 +4,7 @@
 
 
 
-/* This is automatically translated code. */
+ /* This is automatically translated code. */
 
 #pragma warning disable CS1998
 
@@ -12,11 +12,11 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentModbusUmas.Assets;
+using TrapilModbusUmas.Assets;
 
-namespace FluentModbusUmas
+namespace TrapilModbusUmas
 {
-    public abstract partial class ModbusClient
+	public abstract partial class ModbusClient
 	{
         /// <summary>
         /// Sends the requested modbus message and waits for the response.

@@ -1,4 +1,4 @@
-﻿namespace FluentModbusUmas.Assets
+﻿namespace TrapilModbusUmas.Assets
 {
     /// <summary>
     /// Specifies the Modbus exception type.

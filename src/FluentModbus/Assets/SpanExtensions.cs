@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace FluentModbusUmas.Assets
+namespace TrapilModbusUmas.Assets
 {
     /// <summary>
     /// Contains extension methods to read and write data from the Modbus registers.
