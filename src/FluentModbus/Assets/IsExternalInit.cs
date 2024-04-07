@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 
 // workaround class for records and "init" keyword
-namespace System.Runtime.CompilerServices
+namespace FluentModbusUmas.Assets
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal class IsExternalInit { }

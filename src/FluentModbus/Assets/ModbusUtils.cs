@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 #endif
 
-namespace FluentModbusUmas
+namespace FluentModbusUmas.Assets
 {
     internal static class ModbusUtils
     {
@@ -31,7 +31,7 @@ namespace FluentModbusUmas
                 var port = 502U;
 
                 if (addressLength == value.Length ||
-                    (uint.TryParse(value[(addressLength + 1)..].ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out port) && port <= 65536))
+                    uint.TryParse(value[(addressLength + 1)..].ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out port) && port <= 65536)
 
                 {
                     result = new IPEndPoint(address, (int)port);

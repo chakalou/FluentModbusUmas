@@ -1,4 +1,4 @@
-﻿namespace FluentModbusUmas
+﻿namespace FluentModbusUmas.Assets
 {
     /// <summary>
     /// Specifies the action the Modbus server is requested to do.
@@ -83,7 +83,7 @@
         /// <summary>
         /// This function code is used to send user-defined commands and data to a remote device for remote control or for testing.
         /// </summary>
-        UmasCode=0x5a,                      // FC90
+        UmasCode = 0x5a,                      // FC90
 
         //
         /// <summary>

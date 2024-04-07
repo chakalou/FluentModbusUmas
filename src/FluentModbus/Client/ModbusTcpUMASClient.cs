@@ -11,6 +11,7 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using FluentModbusUmas.Assets;
 using FluentModbusUmas.Umas;
 
 

@@ -1,4 +1,4 @@
-﻿namespace FluentModbusUmas
+﻿namespace FluentModbusUmas.Assets
 {
     /// <summary>
     /// Specifies the endianness of the data.

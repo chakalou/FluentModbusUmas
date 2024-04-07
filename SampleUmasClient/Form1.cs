@@ -1,4 +1,5 @@
 using FluentModbusUmas;
+using FluentModbusUmas.Assets;
 using FluentModbusUmas.Umas;
 using System.Collections.Generic;
 using System.ComponentModel;

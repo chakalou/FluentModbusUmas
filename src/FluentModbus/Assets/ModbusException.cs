@@ -1,4 +1,4 @@
-﻿namespace FluentModbusUmas
+﻿namespace FluentModbusUmas.Assets
 {
     /// <summary>
     /// This exception is used for Modbus protocol errors.

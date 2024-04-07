@@ -1,4 +1,4 @@
-﻿namespace FluentModbusUmas
+﻿namespace FluentModbusUmas.Assets
 {
     /// <summary>
     /// A binary writer with extended capability to handle big-endian data.

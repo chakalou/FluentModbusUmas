@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FluentModbusUmas
+namespace FluentModbusUmas.Assets
 {
     /// <summary>
     /// Specifies the UMAS action that client can send to control PLC
@@ -162,13 +162,13 @@ namespace FluentModbusUmas
         /// </summary>
         UMAS_GET_STATUS_MODULE = 0x73,
 
-    /// <summary>
-    /// Code from PLC for OK a request
-    /// </summary>
-    UMAS_RET_OK_FROM_API = 0xFE,
-    ///<summary>
-    ///Code from PLC for bad a request
-    /// </summary>
-    UMAS_RET_BAD_FROM_API = 0xFD
+        /// <summary>
+        /// Code from PLC for OK a request
+        /// </summary>
+        UMAS_RET_OK_FROM_API = 0xFE,
+        ///<summary>
+        ///Code from PLC for bad a request
+        /// </summary>
+        UMAS_RET_BAD_FROM_API = 0xFD
     }
 }

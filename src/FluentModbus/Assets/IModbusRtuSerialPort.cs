@@ -1,4 +1,4 @@
-﻿namespace FluentModbusUmas
+﻿namespace FluentModbusUmas.Assets
 {
     /// <summary>
     /// A serial port for Modbus RTU communication.
